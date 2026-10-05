@@ -12,24 +12,32 @@ import { useTheme } from '../theme/ThemeContext';
 import { useApp } from '../data/AppContext';
 import { AppHeader } from '../components/AppHeader';
 import { SoftCard } from '../components/SoftCard';
+import {
+  IconFace,
+  IconHair,
+  IconBody,
+  IconOral,
+  IconMoreCare,
+  IconChevronRight,
+} from '../components/Icons';
 
 export const AddProductScreen = () => {
-  const { colors, isDark } = useTheme();
-  const { addProduct, selectedBrand, setSelectedBrand, navigate, goBack } = useApp();
+  const { colors } = useTheme();
+  const { addProduct, selectedBrand, navigate, goBack } = useApp();
 
   const [selectedArea, setSelectedArea] = useState('Face');
   const [category, setCategory] = useState('Serum');
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [productName, setProductName] = useState('Vitamin C Serum');
-  const [notes, setNotes] = useState('For brightening and morning glow');
+  const [notes, setNotes] = useState('Morning application for brightening and antioxidant protection');
   const [saveToProducts, setSaveToProducts] = useState(true);
 
   const areas = [
-    { label: 'Face', icon: '🧖‍♀️' },
-    { label: 'Hair', icon: '💇‍♀️' },
-    { label: 'Body', icon: '🧴' },
-    { label: 'Oral', icon: '🪥' },
-    { label: 'Other', icon: '✨' },
+    { label: 'Face', IconComponent: IconFace },
+    { label: 'Hair', IconComponent: IconHair },
+    { label: 'Body', IconComponent: IconBody },
+    { label: 'Oral', IconComponent: IconOral },
+    { label: 'Other', IconComponent: IconMoreCare },
   ];
 
   const categoryMap = {
@@ -37,7 +45,7 @@ export const AddProductScreen = () => {
     Hair: ['Shampoo', 'Conditioner', 'Hair Oil', 'Hair Serum', 'Hair Mask', 'Leave-in', 'Scalp Treatment', 'Other'],
     Body: ['Body Wash', 'Body Lotion', 'Body Scrub', 'Body Oil', 'Deodorant', 'Body Sunscreen', 'Hand Cream', 'Foot Cream', 'Other'],
     Oral: ['Toothbrush', 'Toothpaste', 'Tongue Cleaner', 'Mouthwash', 'Floss', 'Other'],
-    Other: ['General Care', 'Treatment', 'Balm', 'Oil', 'Mist', 'Other'],
+    Other: ['Treatment', 'Balm', 'Mist', 'Other'],
   };
 
   const handleAreaChange = (area) => {
@@ -59,11 +67,10 @@ export const AddProductScreen = () => {
         area: selectedArea,
         brand: selectedBrand,
         notes,
-        icon: selectedArea === 'Face' ? '🧴' : selectedArea === 'Hair' ? '💆‍♀️' : '🫧',
       });
     }
 
-    alert(`Product "${productName}" saved! 🌸`);
+    alert(`Saved ${productName} to your skincare shelf.`);
     navigate('products');
   };
 
@@ -83,9 +90,11 @@ export const AddProductScreen = () => {
         <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
           Where do you use this product?
         </Text>
+
         <View style={styles.areasRow}>
           {areas.map((a) => {
             const isSelected = selectedArea === a.label;
+            const IconComp = a.IconComponent;
             return (
               <TouchableOpacity
                 key={a.label}
@@ -97,19 +106,19 @@ export const AddProductScreen = () => {
                   style={[
                     styles.areaCircle,
                     {
-                      backgroundColor: isSelected ? colors.primary : colors.card,
+                      backgroundColor: isSelected ? colors.primarySoft : colors.card,
                       borderColor: isSelected ? colors.primary : colors.border,
                     },
                   ]}
                 >
-                  <Text style={{ fontSize: 20 }}>{a.icon}</Text>
+                  <IconComp size={20} color={isSelected ? colors.primary : colors.textSecondary} />
                 </View>
                 <Text
                   style={[
                     styles.areaLabel,
                     {
                       color: isSelected ? colors.primary : colors.textSecondary,
-                      fontWeight: isSelected ? '700' : '500',
+                      fontWeight: isSelected ? '600' : '500',
                     },
                   ]}
                 >
@@ -121,14 +130,11 @@ export const AddProductScreen = () => {
         </View>
 
         {/* Product Category */}
-        <Text style={[styles.fieldLabel, { color: colors.textPrimary, marginTop: 22 }]}>
+        <Text style={[styles.fieldLabel, { color: colors.textPrimary, marginTop: 20 }]}>
           Product Category
         </Text>
         <TouchableOpacity
-          style={[
-            styles.pickerInput,
-            { backgroundColor: colors.card, borderColor: colors.border },
-          ]}
+          style={[styles.pickerInput, { backgroundColor: colors.card, borderColor: colors.border }]}
           onPress={() => setShowCategoryPicker(!showCategoryPicker)}
           activeOpacity={0.8}
         >
@@ -139,7 +145,7 @@ export const AddProductScreen = () => {
         </TouchableOpacity>
 
         {showCategoryPicker && (
-          <SoftCard style={styles.dropdownCard} padding={8}>
+          <SoftCard style={styles.dropdownCard} padding={6}>
             {(categoryMap[selectedArea] || categoryMap.Face).map((cat) => (
               <TouchableOpacity
                 key={cat}
@@ -157,7 +163,7 @@ export const AddProductScreen = () => {
                     styles.optionText,
                     {
                       color: category === cat ? colors.primary : colors.textPrimary,
-                      fontWeight: category === cat ? '700' : '400',
+                      fontWeight: category === cat ? '600' : '400',
                     },
                   ]}
                 >
@@ -175,23 +181,20 @@ export const AddProductScreen = () => {
           </Text>
           <TouchableOpacity onPress={() => navigate('select_brand')}>
             <Text style={[styles.typeOwnLink, { color: colors.primary }]}>
-              + Other (Type your own)
+              Choose from list or custom
             </Text>
           </TouchableOpacity>
         </View>
 
         <TouchableOpacity
-          style={[
-            styles.pickerInput,
-            { backgroundColor: colors.card, borderColor: colors.border },
-          ]}
+          style={[styles.pickerInput, { backgroundColor: colors.card, borderColor: colors.border }]}
           onPress={() => navigate('select_brand')}
           activeOpacity={0.8}
         >
           <Text style={[styles.pickerValue, { color: colors.textPrimary }]}>
             {selectedBrand || 'Select brand / company'}
           </Text>
-          <Text style={[styles.pickerArrow, { color: colors.textSecondary }]}>▾</Text>
+          <IconChevronRight size={14} color={colors.textSecondary} />
         </TouchableOpacity>
 
         {/* Product Name */}
@@ -201,11 +204,7 @@ export const AddProductScreen = () => {
         <TextInput
           style={[
             styles.textInput,
-            {
-              backgroundColor: colors.card,
-              borderColor: colors.border,
-              color: colors.textPrimary,
-            },
+            { backgroundColor: colors.card, borderColor: colors.border, color: colors.textPrimary },
           ]}
           value={productName}
           onChangeText={setProductName}
@@ -215,54 +214,44 @@ export const AddProductScreen = () => {
 
         {/* Notes (Optional) */}
         <Text style={[styles.fieldLabel, { color: colors.textPrimary, marginTop: 18 }]}>
-          Notes (Optional)
+          Usage Notes & Actives (Optional)
         </Text>
         <TextInput
           style={[
             styles.textInput,
             styles.notesInput,
-            {
-              backgroundColor: colors.card,
-              borderColor: colors.border,
-              color: colors.textPrimary,
-            },
+            { backgroundColor: colors.card, borderColor: colors.border, color: colors.textPrimary },
           ]}
           value={notes}
           onChangeText={setNotes}
-          placeholder="e.g. For brightening, apply after toner"
+          placeholder="e.g. Apply after toner, follow with moisturizer"
           placeholderTextColor={colors.textMuted}
           multiline
         />
 
         {/* Save to My Products toggle */}
-        <View
-          style={[
-            styles.toggleCard,
-            { backgroundColor: colors.card, borderColor: colors.border },
-          ]}
-        >
+        <View style={[styles.toggleRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={[styles.toggleLabel, { color: colors.textPrimary }]}>
-            Save to My Products
+            Save to My Products Shelf
           </Text>
           <Switch
             value={saveToProducts}
             onValueChange={setSaveToProducts}
             trackColor={{
-              false: isDark ? '#3A3F47' : '#E2E5EA',
+              false: '#E0D8DA',
               true: colors.primary,
             }}
             thumbColor="#FFFFFF"
-            ios_backgroundColor={isDark ? '#3A3F47' : '#E2E5EA'}
           />
         </View>
 
         {/* Save Button */}
         <TouchableOpacity
           style={[styles.saveBtn, { backgroundColor: colors.primary }]}
-          activeOpacity={0.85}
+          activeOpacity={0.88}
           onPress={handleSave}
         >
-          <Text style={styles.saveBtnText}>Save Product</Text>
+          <Text style={styles.saveBtnText}>Save to Products</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -274,28 +263,27 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
+    paddingTop: 16,
     paddingBottom: 40,
   },
   sectionTitle: {
     fontSize: 15,
-    fontWeight: '700',
-    marginTop: 14,
+    fontWeight: '600',
     marginBottom: 14,
   },
   areasRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
   },
   areaItem: {
     alignItems: 'center',
     width: '18%',
   },
   areaCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -305,7 +293,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   fieldLabel: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     marginBottom: 8,
   },
@@ -318,20 +306,19 @@ const styles = StyleSheet.create({
   },
   typeOwnLink: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   pickerInput: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 16,
+    paddingVertical: 13,
+    borderRadius: 14,
     borderWidth: 1,
   },
   pickerValue: {
     fontSize: 14,
-    fontWeight: '500',
   },
   pickerArrow: {
     fontSize: 14,
@@ -349,8 +336,8 @@ const styles = StyleSheet.create({
   },
   textInput: {
     paddingHorizontal: 16,
-    paddingVertical: 13,
-    borderRadius: 16,
+    paddingVertical: 12,
+    borderRadius: 14,
     borderWidth: 1,
     fontSize: 14,
   },
@@ -358,34 +345,35 @@ const styles = StyleSheet.create({
     height: 70,
     textAlignVertical: 'top',
   },
-  toggleCard: {
+  toggleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 14,
-    borderRadius: 16,
+    borderRadius: 14,
     borderWidth: 1,
     marginTop: 20,
   },
   toggleLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   saveBtn: {
-    marginTop: 26,
-    paddingVertical: 16,
-    borderRadius: 30,
+    marginTop: 24,
+    paddingVertical: 14,
+    borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#B85C78',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.16,
     shadowRadius: 10,
     elevation: 3,
   },
   saveBtnText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

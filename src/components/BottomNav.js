@@ -2,16 +2,17 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { useApp } from '../data/AppContext';
+import { IconHome, IconRoutine, IconProgress, IconProfile } from './Icons';
 
 export const BottomNav = () => {
   const { colors } = useTheme();
   const { currentScreen, navigate } = useApp();
 
   const navItems = [
-    { key: 'home', label: 'Home', icon: '🏠' },
-    { key: 'routine', label: 'Routine', icon: '📋' },
-    { key: 'progress', label: 'Progress', icon: '📊' },
-    { key: 'profile', label: 'Profile', icon: '👤' },
+    { key: 'home', label: 'Home', IconComponent: IconHome },
+    { key: 'routine', label: 'Routine', IconComponent: IconRoutine },
+    { key: 'progress', label: 'Progress', IconComponent: IconProgress },
+    { key: 'profile', label: 'Profile', IconComponent: IconProfile },
   ];
 
   return (
@@ -20,12 +21,13 @@ export const BottomNav = () => {
         styles.navContainer,
         {
           backgroundColor: colors.card,
-          borderTopColor: colors.borderSubtle,
+          borderTopColor: colors.border,
         },
       ]}
     >
       {navItems.map((item) => {
         const isActive = currentScreen === item.key;
+        const IconComponent = item.IconComponent;
         return (
           <TouchableOpacity
             key={item.key}
@@ -42,21 +44,17 @@ export const BottomNav = () => {
                 },
               ]}
             >
-              <Text
-                style={[
-                  styles.navIcon,
-                  { color: isActive ? colors.primary : colors.textMuted },
-                ]}
-              >
-                {item.icon}
-              </Text>
+              <IconComponent
+                size={20}
+                color={isActive ? colors.primary : colors.textSecondary}
+              />
             </View>
             <Text
               style={[
                 styles.navLabel,
                 {
                   color: isActive ? colors.primary : colors.textSecondary,
-                  fontWeight: isActive ? '700' : '500',
+                  fontWeight: isActive ? '600' : '400',
                 },
               ]}
             >
@@ -72,17 +70,13 @@ export const BottomNav = () => {
 const styles = StyleSheet.create({
   navContainer: {
     flexDirection: 'row',
-    height: 64,
+    height: 62,
     borderTopWidth: 1,
     paddingHorizontal: 16,
     paddingBottom: 6,
     paddingTop: 6,
     justifyContent: 'space-around',
     alignItems: 'center',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 8,
   },
   navItem: {
     alignItems: 'center',
@@ -90,14 +84,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   iconWrapper: {
-    paddingHorizontal: 12,
-    paddingVertical: 3,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
     marginBottom: 2,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  navIcon: {
-    fontSize: 19,
   },
   navLabel: {
     fontSize: 11,

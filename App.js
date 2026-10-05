@@ -75,7 +75,7 @@ const RootNavigator = () => {
 
 export default function App() {
   return (
-    <ThemeProvider initialAccent="pink" initialMode="light">
+    <ThemeProvider initialMode="light">
       <AppProvider>
         <RootNavigator />
       </AppProvider>

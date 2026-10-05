@@ -4,217 +4,172 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  useWindowDimensions,
+  ScrollView,
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { useApp } from '../data/AppContext';
 import { LotusLogo } from '../components/LotusLogo';
+import { IconSun, IconMoon } from '../components/Icons';
 
 export const SplashScreen = () => {
-  const { colors, accent, setAccent } = useTheme();
+  const { colors, isDark, toggleMode } = useTheme();
   const { navigate } = useApp();
-  const { height } = useWindowDimensions();
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Background Soft Glow / Waves */}
-      <View
-        style={[
-          styles.glowCircle,
-          {
-            backgroundColor: colors.primarySoft,
-            top: -height * 0.15,
-          },
-        ]}
-      />
+    <ScrollView
+      contentContainerStyle={[
+        styles.scrollContainer,
+        { backgroundColor: colors.background },
+      ]}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.contentCard}>
+        {/* Subtle Theme Pill at top right */}
+        <View style={styles.topBar}>
+          <TouchableOpacity
+            onPress={toggleMode}
+            style={[styles.modeToggle, { backgroundColor: colors.card, borderColor: colors.border }]}
+            activeOpacity={0.7}
+          >
+            {isDark ? (
+              <IconSun size={15} color={colors.textSecondary} />
+            ) : (
+              <IconMoon size={15} color={colors.textSecondary} />
+            )}
+            <Text style={[styles.modeToggleText, { color: colors.textSecondary }]}>
+              {isDark ? 'Light' : 'Dark'}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-      <View style={styles.content}>
-        <View style={styles.brandHero}>
-          <LotusLogo size={88} showText={false} centered={true} />
-          <Text style={[styles.mainTitle, { color: colors.textPrimary }]}>
+        {/* Centered Brand Hero */}
+        <View style={styles.heroSection}>
+          <View style={[styles.lotusCircle, { backgroundColor: colors.primarySoft }]}>
+            <LotusLogo size={42} showText={false} centered={true} />
+          </View>
+
+          <Text style={[styles.brandTitle, { color: colors.textPrimary }]}>
             Glow<Text style={{ color: colors.primary }}>Track</Text>
           </Text>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Your Self-Care Companion
+
+          <Text style={[styles.tagline, { color: colors.primary }]}>
+            Your personal self-care companion
+          </Text>
+
+          <Text style={[styles.supportingText, { color: colors.textSecondary }]}>
+            Mindful skincare routines, daily nourishment, gentle hydration, and wellness rituals designed around your lifestyle.
           </Text>
         </View>
 
-        <View style={styles.bottomSection}>
+        {/* Action Button & Subtle Details */}
+        <View style={styles.actionSection}>
           <TouchableOpacity
-            style={[styles.continueButton, { backgroundColor: colors.primary }]}
-            activeOpacity={0.85}
+            style={[styles.primaryButton, { backgroundColor: colors.primary }]}
+            activeOpacity={0.88}
             onPress={() => navigate('home')}
           >
-            <Text style={styles.continueButtonText}>Continue</Text>
+            <Text style={styles.primaryButtonText}>Continue</Text>
           </TouchableOpacity>
 
-          <View style={styles.themeSelectorSection}>
-            <Text style={[styles.chooseThemeLabel, { color: colors.textSecondary }]}>
-              Choose Theme Color
-            </Text>
-            <View style={styles.colorRow}>
-              {/* Blue accent option */}
-              <TouchableOpacity
-                onPress={() => setAccent('blue')}
-                style={styles.colorOption}
-                activeOpacity={0.8}
-              >
-                <View
-                  style={[
-                    styles.colorCircle,
-                    { backgroundColor: '#5B83B7' },
-                    accent === 'blue' && styles.selectedCircle,
-                  ]}
-                >
-                  {accent === 'blue' && <Text style={styles.checkmark}>✓</Text>}
-                </View>
-                <Text
-                  style={[
-                    styles.colorName,
-                    {
-                      color: accent === 'blue' ? '#5B83B7' : colors.textSecondary,
-                      fontWeight: accent === 'blue' ? '700' : '500',
-                    },
-                  ]}
-                >
-                  Blue
-                </Text>
-              </TouchableOpacity>
-
-              {/* Pink accent option */}
-              <TouchableOpacity
-                onPress={() => setAccent('pink')}
-                style={styles.colorOption}
-                activeOpacity={0.8}
-              >
-                <View
-                  style={[
-                    styles.colorCircle,
-                    { backgroundColor: '#D96B91' },
-                    accent === 'pink' && styles.selectedCircle,
-                  ]}
-                >
-                  {accent === 'pink' && <Text style={styles.checkmark}>✓</Text>}
-                </View>
-                <Text
-                  style={[
-                    styles.colorName,
-                    {
-                      color: accent === 'pink' ? '#D96B91' : colors.textSecondary,
-                      fontWeight: accent === 'pink' ? '700' : '500',
-                    },
-                  ]}
-                >
-                  Pink
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <Text style={[styles.discreetFooter, { color: colors.textMuted }]}>
+            Personalized • Privacy First • Cross-Platform
+          </Text>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  glowCircle: {
-    position: 'absolute',
-    left: -50,
-    right: -50,
-    height: 500,
-    borderRadius: 250,
-    opacity: 0.7,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'space-between',
-    paddingHorizontal: 28,
-    paddingVertical: 50,
-    maxWidth: 480,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  brandHero: {
-    flex: 1,
+  scrollContainer: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 40,
+    padding: 24,
   },
-  mainTitle: {
-    fontSize: 38,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-    marginTop: 20,
-  },
-  subtitle: {
-    fontSize: 16,
-    marginTop: 8,
-    fontWeight: '400',
-  },
-  bottomSection: {
+  contentCard: {
+    maxWidth: 440,
     width: '100%',
+    alignItems: 'center',
+    paddingVertical: 32,
+    paddingHorizontal: 20,
+  },
+  topBar: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
     marginBottom: 20,
   },
-  continueButton: {
-    width: '100%',
-    paddingVertical: 16,
-    borderRadius: 30,
+  modeToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  modeToggleText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  heroSection: {
+    alignItems: 'center',
+    textAlign: 'center',
+    marginVertical: 20,
+  },
+  lotusCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 3,
+    marginBottom: 24,
   },
-  continueButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
+  brandTitle: {
+    fontSize: 32,
     fontWeight: '700',
+    letterSpacing: -0.6,
+  },
+  tagline: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginTop: 8,
     letterSpacing: 0.2,
   },
-  themeSelectorSection: {
-    marginTop: 28,
+  supportingText: {
+    fontSize: 14,
+    lineHeight: 22,
+    textAlign: 'center',
+    marginTop: 14,
+    maxWidth: 340,
+  },
+  actionSection: {
+    width: '100%',
+    marginTop: 36,
     alignItems: 'center',
   },
-  chooseThemeLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    marginBottom: 14,
-  },
-  colorRow: {
-    flexDirection: 'row',
-    gap: 36,
-  },
-  colorOption: {
-    alignItems: 'center',
-  },
-  colorCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  primaryButton: {
+    width: '100%',
+    paddingVertical: 15,
+    borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#B85C78',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 3,
   },
-  selectedCircle: {
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  checkmark: {
+  primaryButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    letterSpacing: 0.2,
   },
-  colorName: {
-    marginTop: 8,
-    fontSize: 13,
+  discreetFooter: {
+    fontSize: 12,
+    marginTop: 18,
+    letterSpacing: 0.3,
   },
 });

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { useApp } from '../data/AppContext';
 import { LotusLogo } from './LotusLogo';
+import { IconChevronLeft, IconBell, IconSun, IconMoon, IconProfile } from './Icons';
 
 export const AppHeader = ({
   title,
@@ -12,7 +13,7 @@ export const AppHeader = ({
   rightActions,
   isHome = false,
 }) => {
-  const { colors, mode, accent, toggleMode, toggleAccent } = useTheme();
+  const { colors, isDark, toggleMode } = useTheme();
   const { goBack, navigate } = useApp();
 
   return (
@@ -21,13 +22,13 @@ export const AppHeader = ({
         {showBack ? (
           <TouchableOpacity
             onPress={onBack || goBack}
-            style={[styles.iconButton, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}
+            style={[styles.iconButton, { borderColor: colors.border, backgroundColor: colors.card }]}
             activeOpacity={0.7}
           >
-            <Text style={[styles.iconText, { color: colors.textPrimary }]}>‹</Text>
+            <IconChevronLeft size={18} color={colors.textPrimary} />
           </TouchableOpacity>
         ) : isHome ? (
-          <LotusLogo size={32} showText={true} />
+          <LotusLogo size={24} showText={true} />
         ) : null}
 
         {title && !isHome && (
@@ -47,60 +48,39 @@ export const AppHeader = ({
           rightActions
         ) : (
           <>
-            {/* Quick theme accent toggle (Pink / Blue) */}
-            <TouchableOpacity
-              onPress={toggleAccent}
-              style={[
-                styles.themeBubble,
-                {
-                  backgroundColor: accent === 'pink' ? '#D96B91' : '#5B83B7',
-                  borderColor: colors.card,
-                },
-              ]}
-              title={`Switch accent (currently ${accent})`}
-            >
-              <Text style={styles.themeBubbleText}>
-                {accent === 'pink' ? '🌸' : '💧'}
-              </Text>
-            </TouchableOpacity>
-
-            {/* Light / Dark Mode Toggle */}
+            {/* Minimal Dark/Light Mode toggle button */}
             <TouchableOpacity
               onPress={toggleMode}
-              style={[
-                styles.iconButton,
-                { backgroundColor: colors.cardAlt, borderColor: colors.border },
-              ]}
+              style={[styles.iconButton, { borderColor: colors.border, backgroundColor: colors.card }]}
               activeOpacity={0.7}
-              title={`Switch to ${mode === 'light' ? 'Dark' : 'Light'} mode`}
+              accessibilityLabel="Toggle Theme"
             >
-              <Text style={[styles.modeIcon, { color: colors.textPrimary }]}>
-                {mode === 'light' ? '🌙' : '☀️'}
-              </Text>
+              {isDark ? (
+                <IconSun size={17} color={colors.textPrimary} />
+              ) : (
+                <IconMoon size={17} color={colors.textPrimary} />
+              )}
             </TouchableOpacity>
 
             {/* Notification Bell */}
             <TouchableOpacity
-              style={[
-                styles.iconButton,
-                { backgroundColor: colors.cardAlt, borderColor: colors.border },
-              ]}
+              style={[styles.iconButton, { borderColor: colors.border, backgroundColor: colors.card }]}
               activeOpacity={0.7}
-              onPress={() => alert('All routines and reminders are up to date! 🌸')}
+              onPress={() => alert('All your self-care routines are on schedule.')}
             >
-              <Text style={[styles.modeIcon, { color: colors.textPrimary }]}>🔔</Text>
+              <IconBell size={17} color={colors.textPrimary} />
             </TouchableOpacity>
 
-            {/* Profile Avatar / Shortcut */}
+            {/* Profile Avatar */}
             <TouchableOpacity
               style={[
                 styles.iconButton,
-                { backgroundColor: colors.primarySoft, borderColor: colors.primaryBorder },
+                { backgroundColor: colors.primarySoft, borderColor: 'transparent' },
               ]}
               activeOpacity={0.7}
               onPress={() => navigate('profile')}
             >
-              <Text style={{ fontSize: 16 }}>👤</Text>
+              <IconProfile size={17} color={colors.primary} />
             </TouchableOpacity>
           </>
         )}
@@ -114,7 +94,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingVertical: 14,
     borderBottomWidth: 1,
   },
@@ -124,12 +104,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   titleContainer: {
-    marginLeft: 12,
+    marginLeft: 14,
   },
   headerTitle: {
-    fontSize: 19,
-    fontWeight: '700',
-    letterSpacing: -0.2,
+    fontSize: 18,
+    fontWeight: '600',
+    letterSpacing: -0.3,
   },
   headerSubtitle: {
     fontSize: 12,
@@ -138,7 +118,7 @@ const styles = StyleSheet.create({
   rightSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
   },
   iconButton: {
     width: 36,
@@ -147,24 +127,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  iconText: {
-    fontSize: 24,
-    lineHeight: 26,
-    fontWeight: '300',
-  },
-  modeIcon: {
-    fontSize: 15,
-  },
-  themeBubble: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  themeBubbleText: {
-    fontSize: 12,
   },
 });

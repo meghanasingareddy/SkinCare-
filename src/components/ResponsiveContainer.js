@@ -11,7 +11,7 @@ export const ResponsiveContainer = ({
 }) => {
   const { width } = useWindowDimensions();
   const { colors } = useTheme();
-  const isDesktop = width >= 800;
+  const isDesktop = width >= 860;
 
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: colors.background }]}>
@@ -32,21 +32,26 @@ export const ResponsiveContainer = ({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+    overflow: 'hidden',
   },
   container: {
     flex: 1,
     flexDirection: 'row',
+    height: '100%',
   },
   contentArea: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
+    height: '100%',
+    overflow: 'hidden',
   },
   mainInner: {
     flex: 1,
+    width: '100%',
   },
   desktopMaxWidth: {
-    maxWidth: 1200,
+    maxWidth: 1040,
     width: '100%',
     alignSelf: 'center',
   },

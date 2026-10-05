@@ -5,113 +5,66 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  useWindowDimensions,
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { useApp } from '../data/AppContext';
 import { AppHeader } from '../components/AppHeader';
 import { SoftCard } from '../components/SoftCard';
 import { ProgressBar } from '../components/ProgressBar';
+import {
+  IconSun,
+  IconMoon,
+  IconWaterDrop,
+  IconNutrition,
+  IconCheck,
+  IconChevronRight,
+  IconPlus,
+} from '../components/Icons';
 
 export const HomeScreen = () => {
-  const { colors, isDark } = useTheme();
-  const { navigate, nutrition, userProfile, routine } = useApp();
-  const { width } = useWindowDimensions();
-  const isWide = width >= 800;
+  const { colors } = useTheme();
+  const {
+    navigate,
+    nutrition,
+    addWater,
+    toggleMeal,
+    wellness,
+    routine,
+    toggleRoutineItem,
+  } = useApp();
 
-  // Days of week selector
   const days = [
-    { day: 'M', date: 12, label: 'Mon' },
-    { day: 'T', date: 13, label: 'Tue' },
-    { day: 'W', date: 14, label: 'Wed' },
-    { day: 'T', date: 15, label: 'Thu' },
-    { day: 'F', date: 16, label: 'Fri' },
-    { day: 'S', date: 17, label: 'Sat' },
-    { day: 'S', date: 18, label: 'Sun' },
+    { label: 'Mon', date: 12, completed: true },
+    { label: 'Tue', date: 13, completed: true },
+    { label: 'Wed', date: 14, completed: true },
+    { label: 'Thu', date: 15, completed: false },
+    { label: 'Fri', date: 16, completed: true },
+    { label: 'Sat', date: 17, completed: false },
+    { label: 'Sun', date: 18, completed: false },
   ];
-  const [selectedDayIndex, setSelectedDayIndex] = useState(0);
+  const [selectedDay, setSelectedDay] = useState(0);
 
-  // Calculate routine count
-  const morningCompleted = routine.morning.reduce(
-    (acc, cat) => acc + cat.items.filter((i) => i.completed).length,
-    0
-  );
-  const morningTotal = routine.morning.reduce((acc, cat) => acc + cat.items.length, 0);
+  // Routine counts
+  const morningItems = routine.morning.flatMap((cat) => cat.items);
+  const completedMorning = morningItems.filter((i) => i.completed).length;
+  const totalMorning = morningItems.length;
 
-  const overviewCards = [
-    {
-      id: 'routine',
-      label: 'Routine',
-      value: `${morningCompleted}/${morningTotal}`,
-      icon: '📋',
-      bgColor: colors.routineBg,
-      iconColor: colors.routineIcon,
-      targetScreen: 'routine',
-    },
-    {
-      id: 'water',
-      label: 'Water',
-      value: `${nutrition.waterCurrent} / ${nutrition.waterTarget} L`,
-      icon: '💧',
-      bgColor: colors.waterBg,
-      iconColor: colors.waterIcon,
-      targetScreen: 'nutrition',
-    },
-    {
-      id: 'nutrition',
-      label: 'Nutrition',
-      value: '3/5 meals',
-      icon: '🥗',
-      bgColor: colors.nutritionBg,
-      iconColor: colors.nutritionIcon,
-      targetScreen: 'nutrition',
-    },
-    {
-      id: 'steps',
-      label: 'Steps',
-      value: `${userProfile.stepsToday.toLocaleString()} / 5K`,
-      icon: '👟',
-      bgColor: colors.stepsBg,
-      iconColor: colors.stepsIcon,
-      targetScreen: 'progress',
-    },
-    {
-      id: 'mood',
-      label: 'Mood',
-      value: 'Good',
-      icon: '😊',
-      bgColor: colors.moodBg,
-      iconColor: colors.moodIcon,
-      targetScreen: 'wellness',
-    },
-    {
-      id: 'sleep',
-      label: 'Sleep',
-      value: '7h 20m',
-      icon: '🌙',
-      bgColor: colors.sleepBg,
-      iconColor: colors.sleepIcon,
-      targetScreen: 'wellness',
-    },
-  ];
+  const nightItems = routine.night.flatMap((cat) => cat.items);
+  const completedNight = nightItems.filter((i) => i.completed).length;
+  const totalNight = nightItems.length;
 
-  const quickActions = [
-    { label: 'Routine', icon: '📋', screen: 'routine', tint: colors.routineBg },
-    { label: 'Nutrition', icon: '🥗', screen: 'nutrition', tint: colors.nutritionBg },
-    { label: 'Products', icon: '🧴', screen: 'products', tint: colors.waterBg },
-    { label: 'Wellness', icon: '🧘‍♀️', screen: 'wellness', tint: colors.moodBg },
-    { label: 'Progress', icon: '📊', screen: 'progress', tint: colors.primarySoft },
-    { label: 'More Care', icon: '✨', screen: 'more_care', tint: colors.sleepBg },
-    { label: 'Settings', icon: '⚙️', screen: 'profile', tint: colors.cardAlt },
-  ];
+  const totalRoutine = totalMorning + totalNight;
+  const completedRoutine = completedMorning + completedNight;
+  const progressPercent = Math.round((completedRoutine / totalRoutine) * 100);
 
-  const progressSummary = [
-    { label: 'Skincare', percent: 70 },
-    { label: 'Haircare', percent: 50 },
-    { label: 'Body Care', percent: 40 },
-    { label: 'Nutrition', percent: 60 },
-    { label: 'Hydration', percent: 60 },
-  ];
+  // Mood label
+  const moodLabels = {
+    very_low: 'Low Energy',
+    low: 'Tired',
+    okay: 'Balanced',
+    good: 'Good & Calm',
+    very_good: 'Vibrant',
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -121,188 +74,205 @@ export const HomeScreen = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Date Row */}
-        <View style={styles.dateRow}>
-          <Text style={[styles.dateText, { color: colors.textSecondary }]}>
-            Mon, 12 May 2025
+        {/* Editorial Greeting Header */}
+        <View style={styles.headerHero}>
+          <Text style={[styles.greetingTitle, { color: colors.textPrimary }]}>
+            Good morning, Meghana
+          </Text>
+          <Text style={[styles.greetingSubtitle, { color: colors.textSecondary }]}>
+            Let's take care of you today.
           </Text>
         </View>
 
-        {/* Days Horizontal Bar */}
-        <View style={styles.weekDaysContainer}>
-          {days.map((item, idx) => {
-            const isSelected = selectedDayIndex === idx;
-            return (
-              <TouchableOpacity
-                key={idx}
-                onPress={() => setSelectedDayIndex(idx)}
-                style={[
-                  styles.dayPill,
-                  isSelected && {
-                    backgroundColor: colors.primary,
-                    shadowColor: colors.primary,
-                    shadowOpacity: 0.25,
-                    shadowRadius: 6,
-                    elevation: 3,
-                  },
-                ]}
-                activeOpacity={0.8}
-              >
-                <Text
+        {/* Primary Daily Progress Card */}
+        <SoftCard style={styles.progressCard} padding={22}>
+          <View style={styles.progressHeaderRow}>
+            <View>
+              <Text style={[styles.sectionOverline, { color: colors.textSecondary }]}>
+                TODAY'S PROGRESS
+              </Text>
+              <Text style={[styles.progressNumber, { color: colors.textPrimary }]}>
+                {progressPercent}%
+              </Text>
+            </View>
+            <View style={[styles.routinePill, { backgroundColor: colors.primarySoft }]}>
+              <Text style={[styles.routinePillText, { color: colors.primary }]}>
+                {completedRoutine} of {totalRoutine} habits
+              </Text>
+            </View>
+          </View>
+
+          <ProgressBar
+            progress={progressPercent}
+            color={colors.primary}
+            height={8}
+            style={{ marginTop: 14 }}
+          />
+
+          {/* Weekly Habit Consistency Dots */}
+          <View style={[styles.weeklyRow, { borderTopColor: colors.borderSubtle }]}>
+            {days.map((d, idx) => {
+              const isSelected = selectedDay === idx;
+              return (
+                <TouchableOpacity
+                  key={d.label}
+                  onPress={() => setSelectedDay(idx)}
                   style={[
-                    styles.dayLetter,
-                    {
-                      color: isSelected
-                        ? '#FFFFFF'
-                        : isDark
-                        ? colors.textSecondary
-                        : colors.textPrimary,
-                      fontWeight: isSelected ? '700' : '500',
+                    styles.dayCol,
+                    isSelected && {
+                      backgroundColor: colors.cardAlt,
+                      borderRadius: 12,
                     },
                   ]}
+                  activeOpacity={0.7}
                 >
-                  {item.day}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
+                  <Text style={[styles.dayLabel, { color: colors.textSecondary }]}>
+                    {d.label}
+                  </Text>
+                  <View
+                    style={[
+                      styles.dayDot,
+                      {
+                        backgroundColor: d.completed ? colors.primary : colors.border,
+                      },
+                    ]}
+                  />
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </SoftCard>
+
+        {/* Today's Routine Checklist Section */}
+        <View style={styles.sectionHeaderRow}>
+          <View>
+            <Text style={[styles.sectionHeading, { color: colors.textPrimary }]}>
+              Today's Routine
+            </Text>
+            <Text style={[styles.sectionSub, { color: colors.textSecondary }]}>
+              {completedMorning} / {totalMorning} morning steps completed
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => navigate('routine')}
+            style={styles.viewAllButton}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.viewAllText, { color: colors.primary }]}>View All</Text>
+            <IconChevronRight size={14} color={colors.primary} />
+          </TouchableOpacity>
         </View>
 
-        {/* Overview Section */}
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Overview</Text>
-        </View>
-
-        {/* Responsive Grid for Overview Cards */}
-        <View style={[styles.overviewGrid, isWide && styles.overviewGridWide]}>
-          {overviewCards.map((card) => (
+        {/* Routine Steps Checklist */}
+        <SoftCard style={styles.routineListCard} padding={8}>
+          {routine.morning[0].items.slice(0, 5).map((step, idx) => (
             <TouchableOpacity
-              key={card.id}
+              key={step.id}
               style={[
-                styles.overviewCard,
-                isWide ? styles.overviewCardWide : styles.overviewCardMobile,
-                {
-                  backgroundColor: card.bgColor,
-                  borderColor: colors.borderSubtle,
-                },
+                styles.stepRow,
+                idx < 4 && { borderBottomWidth: 1, borderBottomColor: colors.borderSubtle },
               ]}
-              onPress={() => navigate(card.targetScreen)}
-              activeOpacity={0.8}
+              onPress={() => toggleRoutineItem('morning', 0, step.id)}
+              activeOpacity={0.7}
             >
-              <View style={styles.cardIconBox}>
-                <Text style={styles.cardEmoji}>{card.icon}</Text>
+              <View
+                style={[
+                  styles.checkCircle,
+                  step.completed && {
+                    backgroundColor: colors.primarySoft,
+                    borderColor: colors.primary,
+                  },
+                ]}
+              >
+                {step.completed && <IconCheck size={13} color={colors.primary} />}
               </View>
-              <Text style={[styles.cardLabel, { color: colors.textSecondary }]}>
-                {card.label}
+              <Text
+                style={[
+                  styles.stepTitle,
+                  {
+                    color: step.completed ? colors.textMuted : colors.textPrimary,
+                    textDecorationLine: step.completed ? 'line-through' : 'none',
+                  },
+                ]}
+              >
+                {step.name}
               </Text>
-              <Text style={[styles.cardValue, { color: colors.textPrimary }]}>
-                {card.value}
+              <Text style={[styles.stepCategory, { color: colors.textMuted }]}>
+                Face Care
               </Text>
             </TouchableOpacity>
           ))}
+        </SoftCard>
+
+        {/* Compact Tracking Controls (Water, Meals, Mood, Sleep) */}
+        <View style={styles.sectionHeaderRow}>
+          <Text style={[styles.sectionHeading, { color: colors.textPrimary }]}>
+            Daily Wellness
+          </Text>
         </View>
 
-        {/* Wide Layout: Today's Progress Column */}
-        {isWide && (
-          <View style={styles.desktopSplitSection}>
-            <View style={{ flex: 1 }}>
-              <View style={styles.sectionHeader}>
-                <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-                  Today's Progress
-                </Text>
+        <View style={styles.compactControlsGrid}>
+          {/* Water Tracker */}
+          <SoftCard style={styles.compactCard} padding={16} onPress={() => navigate('nutrition')}>
+            <View style={styles.compactHeader}>
+              <View style={[styles.compactIconBox, { backgroundColor: colors.waterSoft }]}>
+                <IconWaterDrop size={16} color={colors.water} />
               </View>
-              <SoftCard style={{ padding: 20 }}>
-                {progressSummary.map((item, idx) => (
-                  <View key={idx} style={styles.progressRow}>
-                    <Text style={[styles.progressLabel, { color: colors.textPrimary }]}>
-                      {item.label}
-                    </Text>
-                    <View style={styles.progressBarWrapper}>
-                      <ProgressBar progress={item.percent} color={colors.primary} />
-                    </View>
-                    <Text style={[styles.progressPercent, { color: colors.textSecondary }]}>
-                      {item.percent}%
-                    </Text>
-                  </View>
-                ))}
-              </SoftCard>
+              <TouchableOpacity
+                onPress={() => addWater(0.25)}
+                style={[styles.smallAddBtn, { backgroundColor: colors.waterSoft }]}
+              >
+                <IconPlus size={12} color={colors.water} />
+              </TouchableOpacity>
             </View>
+            <Text style={[styles.compactValue, { color: colors.textPrimary }]}>
+              {nutrition.waterCurrent} <Text style={styles.compactUnit}>/ {nutrition.waterTarget}L</Text>
+            </Text>
+            <Text style={[styles.compactLabel, { color: colors.textSecondary }]}>Hydration</Text>
+          </SoftCard>
 
-            <View style={{ flex: 1 }}>
-              <View style={styles.sectionHeader}>
-                <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-                  Quick Actions
-                </Text>
+          {/* Meals Tracker */}
+          <SoftCard style={styles.compactCard} padding={16} onPress={() => navigate('nutrition')}>
+            <View style={styles.compactHeader}>
+              <View style={[styles.compactIconBox, { backgroundColor: colors.successSoft }]}>
+                <IconNutrition size={16} color={colors.success} />
               </View>
-              <SoftCard style={{ padding: 20 }}>
-                <View style={styles.quickActionsGridWide}>
-                  {quickActions.map((action, idx) => (
-                    <TouchableOpacity
-                      key={idx}
-                      style={styles.quickActionItemWide}
-                      onPress={() => navigate(action.screen)}
-                      activeOpacity={0.7}
-                    >
-                      <View style={[styles.actionIconCircle, { backgroundColor: action.tint }]}>
-                        <Text style={styles.actionIconEmoji}>{action.icon}</Text>
-                      </View>
-                      <Text style={[styles.actionLabel, { color: colors.textPrimary }]}>
-                        {action.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </SoftCard>
-            </View>
-          </View>
-        )}
-
-        {/* Mobile Quick Actions */}
-        {!isWide && (
-          <>
-            <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-                Quick Actions
+              <Text style={[styles.compactTag, { color: colors.success }]}>
+                {Object.values(nutrition.meals).filter(Boolean).length}/4
               </Text>
             </View>
-            <View style={styles.quickActionsContainer}>
-              <View style={styles.quickActionsRow}>
-                {quickActions.slice(0, 4).map((action, idx) => (
-                  <TouchableOpacity
-                    key={idx}
-                    style={styles.quickActionItem}
-                    onPress={() => navigate(action.screen)}
-                    activeOpacity={0.7}
-                  >
-                    <View style={[styles.actionIconCircle, { backgroundColor: action.tint }]}>
-                      <Text style={styles.actionIconEmoji}>{action.icon}</Text>
-                    </View>
-                    <Text style={[styles.actionLabel, { color: colors.textPrimary }]}>
-                      {action.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <View style={[styles.quickActionsRow, { marginTop: 14 }]}>
-                {quickActions.slice(4).map((action, idx) => (
-                  <TouchableOpacity
-                    key={idx}
-                    style={styles.quickActionItem}
-                    onPress={() => navigate(action.screen)}
-                    activeOpacity={0.7}
-                  >
-                    <View style={[styles.actionIconCircle, { backgroundColor: action.tint }]}>
-                      <Text style={styles.actionIconEmoji}>{action.icon}</Text>
-                    </View>
-                    <Text style={[styles.actionLabel, { color: colors.textPrimary }]}>
-                      {action.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+            <Text style={[styles.compactValue, { color: colors.textPrimary }]}>
+              3 Meals
+            </Text>
+            <Text style={[styles.compactLabel, { color: colors.textSecondary }]}>Nourishment</Text>
+          </SoftCard>
+
+          {/* Mood Tracker */}
+          <SoftCard style={styles.compactCard} padding={16} onPress={() => navigate('wellness')}>
+            <View style={styles.compactHeader}>
+              <View style={[styles.compactIconBox, { backgroundColor: colors.primarySoft }]}>
+                <IconSun size={16} color={colors.primary} />
               </View>
             </View>
-          </>
-        )}
+            <Text style={[styles.compactValue, { color: colors.textPrimary }]}>
+              {moodLabels[wellness.mood] || 'Balanced'}
+            </Text>
+            <Text style={[styles.compactLabel, { color: colors.textSecondary }]}>Current Mood</Text>
+          </SoftCard>
+
+          {/* Sleep Tracker */}
+          <SoftCard style={styles.compactCard} padding={16} onPress={() => navigate('wellness')}>
+            <View style={styles.compactHeader}>
+              <View style={[styles.compactIconBox, { backgroundColor: colors.moonNightSoft }]}>
+                <IconMoon size={16} color={colors.moonNight} />
+              </View>
+            </View>
+            <Text style={[styles.compactValue, { color: colors.textPrimary }]}>
+              {wellness.sleep.duration}
+            </Text>
+            <Text style={[styles.compactLabel, { color: colors.textSecondary }]}>Rest & Recovery</Text>
+          </SoftCard>
+        </View>
       </ScrollView>
     </View>
   );
@@ -313,141 +283,169 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 30,
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 40,
   },
-  dateRow: {
-    marginTop: 12,
-    marginBottom: 8,
+  headerHero: {
+    marginVertical: 18,
   },
-  dateText: {
-    fontSize: 13,
-    fontWeight: '500',
+  greetingTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    letterSpacing: -0.4,
   },
-  weekDaysContainer: {
+  greetingSubtitle: {
+    fontSize: 14,
+    marginTop: 4,
+    letterSpacing: 0.1,
+  },
+  progressCard: {
+    marginBottom: 26,
+  },
+  progressHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 12,
+    alignItems: 'flex-start',
   },
-  dayPill: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dayLetter: {
-    fontSize: 14,
-  },
-  sectionHeader: {
-    marginTop: 18,
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 17,
+  sectionOverline: {
+    fontSize: 10,
     fontWeight: '700',
+    letterSpacing: 1.2,
+  },
+  progressNumber: {
+    fontSize: 32,
+    fontWeight: '800',
+    letterSpacing: -0.8,
+    marginTop: 4,
+  },
+  routinePill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+  },
+  routinePillText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  weeklyRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    paddingTop: 16,
+    borderTopWidth: 1,
+  },
+  dayCol: {
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+  },
+  dayLabel: {
+    fontSize: 11,
+    fontWeight: '500',
+    marginBottom: 6,
+  },
+  dayDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+    marginTop: 6,
+  },
+  sectionHeading: {
+    fontSize: 17,
+    fontWeight: '600',
     letterSpacing: -0.2,
   },
-  overviewGrid: {
+  sectionSub: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  viewAllText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  routineListCard: {
+    marginBottom: 26,
+  },
+  stepRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+  },
+  checkCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    borderColor: '#EDE5E7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  stepTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    flex: 1,
+  },
+  stepCategory: {
+    fontSize: 12,
+  },
+  compactControlsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
   },
-  overviewGridWide: {
-    flexWrap: 'wrap',
-    gap: 16,
-  },
-  overviewCard: {
-    borderRadius: 20,
-    paddingVertical: 16,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  overviewCardMobile: {
-    width: '30.5%',
-    minHeight: 112,
-  },
-  overviewCardWide: {
-    flexBasis: '15%',
+  compactCard: {
+    width: '48%',
     flexGrow: 1,
-    minHeight: 120,
   },
-  cardIconBox: {
-    marginBottom: 8,
-  },
-  cardEmoji: {
-    fontSize: 22,
-  },
-  cardLabel: {
-    fontSize: 11,
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  cardValue: {
-    fontSize: 13,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  quickActionsContainer: {
-    marginTop: 4,
-  },
-  quickActionsRow: {
+  compactHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-  },
-  quickActionItem: {
     alignItems: 'center',
-    width: '22%',
+    marginBottom: 12,
   },
-  actionIconCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+  compactIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 6,
   },
-  actionIconEmoji: {
-    fontSize: 22,
-  },
-  actionLabel: {
-    fontSize: 12,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  desktopSplitSection: {
-    flexDirection: 'row',
-    gap: 24,
-    marginTop: 20,
-  },
-  progressRow: {
-    flexDirection: 'row',
+  smallAddBtn: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     alignItems: 'center',
-    marginVertical: 10,
+    justifyContent: 'center',
   },
-  progressLabel: {
-    width: 100,
-    fontSize: 13,
-    fontWeight: '500',
+  compactTag: {
+    fontSize: 11,
+    fontWeight: '700',
   },
-  progressBarWrapper: {
-    flex: 1,
-    marginHorizontal: 14,
+  compactValue: {
+    fontSize: 17,
+    fontWeight: '700',
+    letterSpacing: -0.3,
   },
-  progressPercent: {
-    width: 40,
+  compactUnit: {
     fontSize: 12,
-    textAlign: 'right',
+    fontWeight: '400',
   },
-  quickActionsGridWide: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 16,
-  },
-  quickActionItemWide: {
-    alignItems: 'center',
-    width: 78,
+  compactLabel: {
+    fontSize: 12,
+    marginTop: 2,
   },
 });

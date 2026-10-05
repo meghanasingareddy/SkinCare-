@@ -11,39 +11,44 @@ import { useApp } from '../data/AppContext';
 import { AppHeader } from '../components/AppHeader';
 import { SoftCard } from '../components/SoftCard';
 import { ProgressBar } from '../components/ProgressBar';
+import {
+  IconWaterDrop,
+  IconCheck,
+  IconPlus,
+} from '../components/Icons';
 
 export const NutritionScreen = () => {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const { nutrition, toggleMeal, addWater, updateIntake, navigate } = useApp();
-
   const [activeTab, setActiveTab] = useState('daily'); // 'daily' | 'weekly'
 
   const meals = [
-    { key: 'breakfast', label: 'Breakfast', icon: '🥞' },
-    { key: 'lunch', label: 'Lunch', icon: '🥗' },
-    { key: 'snack', label: 'Snack', icon: '🍎' },
-    { key: 'dinner', label: 'Dinner', icon: '🍲' },
+    { key: 'breakfast', label: 'Breakfast' },
+    { key: 'lunch', label: 'Lunch' },
+    { key: 'snack', label: 'Afternoon Snack' },
+    { key: 'dinner', label: 'Dinner' },
   ];
 
-  const intakeItems = [
-    { key: 'oats', label: 'Oats', unit: 'serving', icon: '🥣' },
-    { key: 'fruits', label: 'Fruits', unit: 'servings', icon: '🍎' },
-    { key: 'vegetables', label: 'Vegetables', unit: 'servings', icon: '🥦' },
-    { key: 'addedSugar', label: 'Added Sugar', unit: 'serving', icon: '🍬' },
-    { key: 'junkFood', label: 'Junk Food', unit: 'servings', icon: '🍟' },
-  ];
-
-  const quickWaterAmounts = [
+  const quickWater = [
     { label: '+250 ml', val: 0.25 },
     { label: '+500 ml', val: 0.5 },
-    { label: '+750 ml', val: 0.75 },
     { label: '+1 L', val: 1.0 },
   ];
+
+  const habits = [
+    { key: 'fruits', label: 'Fresh Fruits', count: nutrition.intake.fruits || 0, unit: 'servings' },
+    { key: 'vegetables', label: 'Greens & Veggies', count: nutrition.intake.vegetables || 0, unit: 'servings' },
+    { key: 'oats', label: 'Whole Grains / Oats', count: nutrition.intake.oats || 0, unit: 'serving' },
+    { key: 'addedSugar', label: 'Added Sugar', count: nutrition.intake.addedSugar || 0, unit: 'serving' },
+  ];
+
+  const waterPercent = Math.min(100, Math.round((nutrition.waterCurrent / nutrition.waterTarget) * 100));
+  const proteinPercent = Math.min(100, Math.round((nutrition.proteinCurrent / nutrition.proteinTarget) * 100));
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <AppHeader
-        title="Nutrition Tracker"
+        title="Nourishment & Water"
         showBack={true}
         onBack={() => navigate('home')}
       />
@@ -52,335 +57,216 @@ export const NutritionScreen = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Daily / Weekly Tabs */}
-        <View style={[styles.tabToggleRow, { backgroundColor: colors.cardAlt }]}>
+        {/* Subtle Tab Switcher */}
+        <View style={[styles.tabBar, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <TouchableOpacity
-            style={[
-              styles.tabBtn,
-              activeTab === 'daily' && { backgroundColor: colors.primary },
-            ]}
+            style={[styles.tabItem, activeTab === 'daily' && { backgroundColor: colors.primarySoft }]}
             onPress={() => setActiveTab('daily')}
             activeOpacity={0.8}
           >
             <Text
               style={[
-                styles.tabBtnText,
-                {
-                  color: activeTab === 'daily' ? '#FFFFFF' : colors.textSecondary,
-                  fontWeight: activeTab === 'daily' ? '700' : '500',
-                },
+                styles.tabText,
+                { color: activeTab === 'daily' ? colors.primary : colors.textSecondary, fontWeight: activeTab === 'daily' ? '600' : '400' },
               ]}
             >
-              Daily
+              Daily Wellness
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[
-              styles.tabBtn,
-              activeTab === 'weekly' && { backgroundColor: colors.primary },
-            ]}
+            style={[styles.tabItem, activeTab === 'weekly' && { backgroundColor: colors.primarySoft }]}
             onPress={() => setActiveTab('weekly')}
             activeOpacity={0.8}
           >
             <Text
               style={[
-                styles.tabBtnText,
-                {
-                  color: activeTab === 'weekly' ? '#FFFFFF' : colors.textSecondary,
-                  fontWeight: activeTab === 'weekly' ? '700' : '500',
-                },
+                styles.tabText,
+                { color: activeTab === 'weekly' ? colors.primary : colors.textSecondary, fontWeight: activeTab === 'weekly' ? '600' : '400' },
               ]}
             >
-              Weekly
+              Weekly Consistency
             </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Date Navigator */}
-        <View style={styles.dateNavRow}>
-          <TouchableOpacity style={styles.arrowBtn}>
-            <Text style={[styles.arrowText, { color: colors.textSecondary }]}>‹</Text>
-          </TouchableOpacity>
-          <Text style={[styles.dateNavText, { color: colors.textPrimary }]}>
-            Mon, 12 May 2025
-          </Text>
-          <TouchableOpacity style={styles.arrowBtn}>
-            <Text style={[styles.arrowText, { color: colors.textSecondary }]}>›</Text>
           </TouchableOpacity>
         </View>
 
         {activeTab === 'daily' ? (
           <>
-            {/* Meals Section */}
-            <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Meals</Text>
+            {/* Prominent Hydration Card */}
+            <SoftCard style={styles.hydrationCard} padding={22} borderRadius={20}>
+              <View style={styles.hydrationHeader}>
+                <View style={styles.hydrationLeft}>
+                  <View style={[styles.waterIconCircle, { backgroundColor: colors.waterSoft }]}>
+                    <IconWaterDrop size={20} color={colors.water} />
+                  </View>
+                  <View>
+                    <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Hydration Goal</Text>
+                    <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
+                      Pure water & herbal infusions
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.hydrationValueBox}>
+                  <Text style={[styles.hydrationValue, { color: colors.textPrimary }]}>
+                    {nutrition.waterCurrent}
+                    <Text style={[styles.hydrationTarget, { color: colors.textSecondary }]}>
+                      {' '}/ {nutrition.waterTarget} L
+                    </Text>
+                  </Text>
+                </View>
+              </View>
+
+              <ProgressBar progress={waterPercent} color={colors.water} height={7} style={{ marginVertical: 16 }} />
+
+              <View style={styles.quickWaterRow}>
+                {quickWater.map((q) => (
+                  <TouchableOpacity
+                    key={q.label}
+                    onPress={() => addWater(q.val)}
+                    style={[styles.quickWaterBtn, { borderColor: colors.border, backgroundColor: colors.cardAlt }]}
+                    activeOpacity={0.7}
+                  >
+                    <IconPlus size={12} color={colors.water} />
+                    <Text style={[styles.quickWaterText, { color: colors.textPrimary }]}>{q.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </SoftCard>
+
+            {/* Today's Meals Section */}
+            <View style={styles.sectionHeaderRow}>
+              <Text style={[styles.sectionHeading, { color: colors.textPrimary }]}>
+                Today's Meals
+              </Text>
             </View>
 
-            <View style={styles.mealsRow}>
-              {meals.map((m) => {
+            <SoftCard style={styles.mealsCard} padding={12} borderRadius={18}>
+              {meals.map((m, idx) => {
                 const isChecked = !!nutrition.meals[m.key];
                 return (
                   <TouchableOpacity
                     key={m.key}
                     onPress={() => toggleMeal(m.key)}
-                    style={styles.mealItem}
+                    style={[
+                      styles.mealRow,
+                      idx < meals.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.borderSubtle },
+                    ]}
                     activeOpacity={0.7}
                   >
                     <View
                       style={[
-                        styles.mealCircle,
-                        {
-                          backgroundColor: isChecked ? colors.primarySoft : colors.card,
-                          borderColor: isChecked ? colors.primary : colors.border,
-                        },
+                        styles.mealCheck,
+                        isChecked && { backgroundColor: colors.successSoft, borderColor: colors.success },
                       ]}
                     >
-                      <Text style={{ fontSize: 22 }}>
-                        {isChecked ? '✓' : m.icon}
-                      </Text>
+                      {isChecked && <IconCheck size={12} color={colors.success} />}
                     </View>
                     <Text
                       style={[
-                        styles.mealLabel,
+                        styles.mealTitle,
                         {
-                          color: isChecked ? colors.primary : colors.textSecondary,
-                          fontWeight: isChecked ? '700' : '500',
+                          color: isChecked ? colors.textPrimary : colors.textSecondary,
+                          fontWeight: isChecked ? '600' : '400',
                         },
                       ]}
                     >
                       {m.label}
                     </Text>
+                    <Text style={[styles.mealStatus, { color: isChecked ? colors.success : colors.textMuted }]}>
+                      {isChecked ? 'Mindfully Nourished' : 'Pending'}
+                    </Text>
                   </TouchableOpacity>
                 );
               })}
-            </View>
+            </SoftCard>
 
-            {/* Nutrition Goals */}
-            <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-                Nutrition Goals
+            {/* Nutrition Goals (Protein & Clean Whole Foods) */}
+            <View style={styles.sectionHeaderRow}>
+              <Text style={[styles.sectionHeading, { color: colors.textPrimary }]}>
+                Nourishment Balance
               </Text>
             </View>
 
-            <View style={styles.goalsContainer}>
-              {/* Protein Goal */}
-              <SoftCard style={styles.goalCard} padding={16}>
-                <View style={styles.goalTitleRow}>
-                  <View style={styles.goalLeft}>
-                    <Text style={{ fontSize: 18, marginRight: 8 }}>🥩</Text>
-                    <Text style={[styles.goalLabel, { color: colors.textSecondary }]}>
-                      Protein
-                    </Text>
-                  </View>
-                  <Text style={[styles.goalValue, { color: colors.textPrimary }]}>
-                    {nutrition.proteinCurrent}g / {nutrition.proteinTarget}g
-                  </Text>
-                </View>
-                <ProgressBar
-                  progress={(nutrition.proteinCurrent / nutrition.proteinTarget) * 100}
-                  color={colors.primary}
-                  height={8}
-                  style={{ marginTop: 10 }}
-                />
-              </SoftCard>
+            <SoftCard style={{ padding: 18, marginBottom: 20 }} borderRadius={18}>
+              <View style={styles.proteinHeader}>
+                <Text style={[styles.proteinLabel, { color: colors.textPrimary }]}>Daily Protein Target</Text>
+                <Text style={[styles.proteinScore, { color: colors.primary }]}>
+                  {nutrition.proteinCurrent}g <Text style={{ color: colors.textSecondary, fontWeight: '400' }}>/ {nutrition.proteinTarget}g</Text>
+                </Text>
+              </View>
+              <ProgressBar progress={proteinPercent} color={colors.primary} height={6} style={{ marginTop: 10, marginBottom: 18 }} />
 
-              {/* Water Goal */}
-              <SoftCard style={styles.goalCard} padding={16}>
-                <View style={styles.goalTitleRow}>
-                  <View style={styles.goalLeft}>
-                    <Text style={{ fontSize: 18, marginRight: 8 }}>💧</Text>
-                    <Text style={[styles.goalLabel, { color: colors.textSecondary }]}>
-                      Water
-                    </Text>
-                  </View>
-                  <Text style={[styles.goalValue, { color: colors.waterIcon }]}>
-                    {nutrition.waterCurrent} / {nutrition.waterTarget} L
-                  </Text>
-                </View>
-                <ProgressBar
-                  progress={(nutrition.waterCurrent / nutrition.waterTarget) * 100}
-                  color={colors.waterIcon}
-                  height={8}
-                  style={{ marginTop: 10 }}
-                />
-
-                {/* Quick Add Water Buttons */}
-                <View style={styles.waterQuickAddRow}>
-                  {quickWaterAmounts.map((q) => (
-                    <TouchableOpacity
-                      key={q.label}
-                      onPress={() => addWater(q.val)}
-                      style={[
-                        styles.waterQuickBtn,
-                        { backgroundColor: colors.waterBg, borderColor: colors.borderSubtle },
-                      ]}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={[styles.waterQuickText, { color: colors.waterIcon }]}>
-                        {q.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </SoftCard>
-            </View>
-
-            {/* Today's Intake */}
-            <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-                Today's Intake
-              </Text>
-            </View>
-
-            <SoftCard style={{ padding: 6 }}>
-              {intakeItems.map((item, idx) => {
-                const count = nutrition.intake[item.key] || 0;
-                return (
-                  <View
-                    key={item.key}
-                    style={[
-                      styles.intakeRow,
-                      idx < intakeItems.length - 1 && {
-                        borderBottomWidth: 1,
-                        borderBottomColor: colors.borderSubtle,
-                      },
-                    ]}
-                  >
-                    <View style={styles.intakeLeft}>
-                      <Text style={{ fontSize: 20, marginRight: 12 }}>{item.icon}</Text>
-                      <Text style={[styles.intakeLabel, { color: colors.textPrimary }]}>
-                        {item.label}
-                      </Text>
-                    </View>
-
-                    <View style={styles.counterRow}>
-                      <Text style={[styles.intakeCountText, { color: colors.textSecondary }]}>
-                        {count} {item.unit}
+              <View style={[styles.habitsList, { borderTopWidth: 1, borderTopColor: colors.borderSubtle, paddingTop: 12 }]}>
+                {habits.map((item) => (
+                  <View key={item.key} style={styles.habitRow}>
+                    <Text style={[styles.habitLabel, { color: colors.textPrimary }]}>{item.label}</Text>
+                    <View style={styles.stepperRow}>
+                      <Text style={[styles.habitCount, { color: colors.textSecondary }]}>
+                        {item.count} {item.unit}
                       </Text>
                       <TouchableOpacity
                         onPress={() => updateIntake(item.key, -1)}
-                        style={[
-                          styles.counterBtn,
-                          { backgroundColor: colors.cardAlt, borderColor: colors.border },
-                        ]}
+                        style={[styles.stepBtn, { borderColor: colors.border }]}
                       >
-                        <Text style={[styles.counterBtnText, { color: colors.textPrimary }]}>
-                          -
-                        </Text>
+                        <Text style={[styles.stepBtnText, { color: colors.textSecondary }]}>–</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => updateIntake(item.key, 1)}
-                        style={[
-                          styles.counterBtn,
-                          { backgroundColor: colors.primarySoft, borderColor: colors.primaryBorder },
-                        ]}
+                        style={[styles.stepBtn, { borderColor: colors.border, backgroundColor: colors.cardAlt }]}
                       >
-                        <Text style={[styles.counterBtnText, { color: colors.primary }]}>
-                          +
-                        </Text>
+                        <Text style={[styles.stepBtnText, { color: colors.textPrimary }]}>+</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
-                );
-              })}
+                ))}
+              </View>
             </SoftCard>
           </>
         ) : (
-          /* Weekly Consistency Matrix */
-          <SoftCard style={{ padding: 14 }}>
-            <Text style={[styles.weeklyMatrixTitle, { color: colors.textPrimary }]}>
-              Weekly Consistency Tracker
+          /* Weekly Consistency View */
+          <SoftCard style={{ padding: 20 }} borderRadius={18}>
+            <Text style={[styles.weeklyTitle, { color: colors.textPrimary }]}>
+              Weekly Nourishment Rhythm
             </Text>
-            <Text style={[styles.weeklyMatrixSubtitle, { color: colors.textSecondary }]}>
-              Track healthy habits across the week without stressful calorie counting.
+            <Text style={[styles.weeklySub, { color: colors.textSecondary }]}>
+              Consistency over perfection across your week.
             </Text>
 
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View style={styles.matrixTable}>
-                {/* Table Header */}
-                <View style={styles.matrixRow}>
-                  <Text style={[styles.matrixMetricHeader, { color: colors.textMuted }]}>
-                    METRIC
-                  </Text>
-                  {nutrition.weeklyMatrix.map((col) => (
-                    <Text
-                      key={col.day}
-                      style={[styles.matrixColHeader, { color: colors.textPrimary }]}
-                    >
-                      {col.day}
+              <View style={styles.matrix}>
+                <View style={styles.matrixHeaderRow}>
+                  <Text style={[styles.matrixMetricCol, { color: colors.textMuted }]}>HABIT</Text>
+                  {nutrition.weeklyMatrix.map((c) => (
+                    <Text key={c.day} style={[styles.matrixDayCol, { color: colors.textPrimary }]}>
+                      {c.day}
                     </Text>
                   ))}
                 </View>
 
-                {/* Meals Row */}
-                <View style={[styles.matrixRow, { borderTopWidth: 1, borderTopColor: colors.borderSubtle }]}>
-                  <Text style={[styles.matrixMetricName, { color: colors.textPrimary }]}>
-                    Meals
-                  </Text>
-                  {nutrition.weeklyMatrix.map((col) => (
-                    <Text key={col.day} style={[styles.matrixCell, { color: colors.primary }]}>
-                      {col.meals === '4/4' ? '✓' : '3/4'}
+                <View style={[styles.matrixDataRow, { borderTopColor: colors.borderSubtle }]}>
+                  <Text style={[styles.matrixMetricName, { color: colors.textPrimary }]}>Meals</Text>
+                  {nutrition.weeklyMatrix.map((c) => (
+                    <Text key={c.day} style={[styles.matrixCell, { color: colors.success }]}>
+                      {c.meals === '4/4' ? '●' : '○'}
                     </Text>
                   ))}
                 </View>
 
-                {/* Protein Row */}
-                <View style={[styles.matrixRow, { borderTopWidth: 1, borderTopColor: colors.borderSubtle }]}>
-                  <Text style={[styles.matrixMetricName, { color: colors.textPrimary }]}>
-                    Protein (g)
-                  </Text>
-                  {nutrition.weeklyMatrix.map((col) => (
-                    <Text key={col.day} style={[styles.matrixCell, { color: colors.textPrimary }]}>
-                      {col.protein}
+                <View style={[styles.matrixDataRow, { borderTopColor: colors.borderSubtle }]}>
+                  <Text style={[styles.matrixMetricName, { color: colors.textPrimary }]}>Water (L)</Text>
+                  {nutrition.weeklyMatrix.map((c) => (
+                    <Text key={c.day} style={[styles.matrixCell, { color: colors.water }]}>
+                      {c.water}
                     </Text>
                   ))}
                 </View>
 
-                {/* Water Row */}
-                <View style={[styles.matrixRow, { borderTopWidth: 1, borderTopColor: colors.borderSubtle }]}>
-                  <Text style={[styles.matrixMetricName, { color: colors.textPrimary }]}>
-                    Water (L)
-                  </Text>
-                  {nutrition.weeklyMatrix.map((col) => (
-                    <Text key={col.day} style={[styles.matrixCell, { color: colors.waterIcon }]}>
-                      {col.water}
-                    </Text>
-                  ))}
-                </View>
-
-                {/* Oats Row */}
-                <View style={[styles.matrixRow, { borderTopWidth: 1, borderTopColor: colors.borderSubtle }]}>
-                  <Text style={[styles.matrixMetricName, { color: colors.textPrimary }]}>
-                    Oats
-                  </Text>
-                  {nutrition.weeklyMatrix.map((col) => (
-                    <Text key={col.day} style={[styles.matrixCell, { color: colors.textSecondary }]}>
-                      {col.oats}
-                    </Text>
-                  ))}
-                </View>
-
-                {/* Junk Food Row */}
-                <View style={[styles.matrixRow, { borderTopWidth: 1, borderTopColor: colors.borderSubtle }]}>
-                  <Text style={[styles.matrixMetricName, { color: colors.textPrimary }]}>
-                    Junk Food
-                  </Text>
-                  {nutrition.weeklyMatrix.map((col) => (
-                    <Text key={col.day} style={[styles.matrixCell, { color: colors.textSecondary }]}>
-                      {col.junk}
-                    </Text>
-                  ))}
-                </View>
-
-                {/* Added Sugar Row */}
-                <View style={[styles.matrixRow, { borderTopWidth: 1, borderTopColor: colors.borderSubtle }]}>
-                  <Text style={[styles.matrixMetricName, { color: colors.textPrimary }]}>
-                    Sugar
-                  </Text>
-                  {nutrition.weeklyMatrix.map((col) => (
-                    <Text key={col.day} style={[styles.matrixCell, { color: colors.textSecondary }]}>
-                      {col.sugar}
+                <View style={[styles.matrixDataRow, { borderTopColor: colors.borderSubtle }]}>
+                  <Text style={[styles.matrixMetricName, { color: colors.textPrimary }]}>Protein (g)</Text>
+                  {nutrition.weeklyMatrix.map((c) => (
+                    <Text key={c.day} style={[styles.matrixCell, { color: colors.textPrimary }]}>
+                      {c.protein}
                     </Text>
                   ))}
                 </View>
@@ -398,185 +284,208 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
+    paddingTop: 16,
     paddingBottom: 40,
   },
-  tabToggleRow: {
+  tabBar: {
     flexDirection: 'row',
-    borderRadius: 24,
-    padding: 4,
-    marginVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 3,
+    marginBottom: 20,
   },
-  tabBtn: {
+  tabItem: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 9,
     alignItems: 'center',
-    borderRadius: 20,
+    borderRadius: 13,
   },
-  tabBtnText: {
-    fontSize: 14,
+  tabText: {
+    fontSize: 13,
   },
-  dateNavRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: 10,
-    gap: 16,
+  hydrationCard: {
+    marginBottom: 24,
   },
-  arrowBtn: {
-    padding: 6,
-  },
-  arrowText: {
-    fontSize: 22,
-    fontWeight: '300',
-  },
-  dateNavText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  sectionHeader: {
-    marginTop: 18,
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: -0.2,
-  },
-  mealsRow: {
+  hydrationHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-  },
-  mealItem: {
     alignItems: 'center',
-    width: '22%',
   },
-  mealCircle: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    borderWidth: 1.5,
+  hydrationLeft: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 6,
-  },
-  mealLabel: {
-    fontSize: 12,
-  },
-  goalsContainer: {
     gap: 12,
   },
-  goalCard: {
-    borderRadius: 18,
-  },
-  goalTitleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  waterIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  goalLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  goalLabel: {
-    fontSize: 14,
+  cardTitle: {
+    fontSize: 15,
     fontWeight: '600',
   },
-  goalValue: {
-    fontSize: 14,
+  cardSubtitle: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  hydrationValueBox: {
+    alignItems: 'flex-end',
+  },
+  hydrationValue: {
+    fontSize: 20,
     fontWeight: '700',
   },
-  waterQuickAddRow: {
+  hydrationTarget: {
+    fontSize: 13,
+    fontWeight: '400',
+  },
+  quickWaterRow: {
     flexDirection: 'row',
     gap: 8,
-    marginTop: 14,
   },
-  waterQuickBtn: {
+  quickWaterBtn: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
     paddingVertical: 8,
     borderRadius: 12,
     borderWidth: 1,
-    alignItems: 'center',
   },
-  waterQuickText: {
+  quickWaterText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '500',
   },
-  intakeRow: {
+  sectionHeaderRow: {
+    marginBottom: 10,
+  },
+  sectionHeading: {
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: -0.2,
+  },
+  mealsCard: {
+    marginBottom: 24,
+  },
+  mealRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+  },
+  mealCheck: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#EDE5E7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  mealTitle: {
+    flex: 1,
+    fontSize: 14,
+  },
+  mealStatus: {
+    fontSize: 12,
+  },
+  proteinHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 10,
   },
-  intakeLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  intakeLabel: {
+  proteinLabel: {
     fontSize: 14,
     fontWeight: '600',
   },
-  counterRow: {
+  proteinScore: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  habitsList: {
+    gap: 12,
+  },
+  habitRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  habitLabel: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  stepperRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
-  intakeCountText: {
-    fontSize: 13,
+  habitCount: {
+    fontSize: 12,
     minWidth: 70,
     textAlign: 'right',
   },
-  counterBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+  stepBtn: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  counterBtnText: {
-    fontSize: 16,
-    fontWeight: '700',
-    lineHeight: 18,
+  stepBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    lineHeight: 16,
   },
-  weeklyMatrixTitle: {
+  weeklyTitle: {
     fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 4,
+    fontWeight: '600',
   },
-  weeklyMatrixSubtitle: {
+  weeklySub: {
     fontSize: 12,
+    marginTop: 2,
     marginBottom: 16,
   },
-  matrixTable: {
-    minWidth: 460,
+  matrix: {
+    minWidth: 420,
   },
-  matrixRow: {
+  matrixHeaderRow: {
+    flexDirection: 'row',
+    paddingVertical: 8,
+  },
+  matrixMetricCol: {
+    width: 90,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+  matrixDayCol: {
+    width: 44,
+    textAlign: 'center',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  matrixDataRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
-  },
-  matrixMetricHeader: {
-    width: 100,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  matrixColHeader: {
-    width: 48,
-    fontSize: 12,
-    fontWeight: '700',
-    textAlign: 'center',
+    borderTopWidth: 1,
   },
   matrixMetricName: {
-    width: 100,
+    width: 90,
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   matrixCell: {
-    width: 48,
+    width: 44,
+    textAlign: 'center',
     fontSize: 13,
     fontWeight: '600',
-    textAlign: 'center',
   },
 });

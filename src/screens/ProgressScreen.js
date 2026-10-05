@@ -11,17 +11,38 @@ import { useApp } from '../data/AppContext';
 import { AppHeader } from '../components/AppHeader';
 import { SoftCard } from '../components/SoftCard';
 import { ProgressBar } from '../components/ProgressBar';
+import {
+  IconFace,
+  IconHair,
+  IconBody,
+  IconOral,
+  IconNutrition,
+  IconWaterDrop,
+  IconProgress,
+  IconWellness,
+} from '../components/Icons';
 
 export const ProgressScreen = () => {
   const { colors } = useTheme();
   const { progress, navigate } = useApp();
-
   const [activeTab, setActiveTab] = useState('weekly'); // 'weekly' | 'monthly'
+
+  const iconMapping = {
+    skincare: IconFace,
+    haircare: IconHair,
+    bodycare: IconBody,
+    oralcare: IconOral,
+    nutrition: IconNutrition,
+    hydration: IconWaterDrop,
+    fitness: IconProgress,
+    wellness: IconWellness,
+    grooming: IconFace,
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <AppHeader
-        title="Progress"
+        title="Habit Consistency"
         showBack={true}
         onBack={() => navigate('home')}
       />
@@ -30,129 +51,109 @@ export const ProgressScreen = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Weekly / Monthly Toggle */}
-        <View style={[styles.tabBar, { backgroundColor: colors.cardAlt }]}>
+        {/* Subtle Tab Switcher */}
+        <View style={[styles.tabBar, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <TouchableOpacity
-            style={[
-              styles.tabBtn,
-              activeTab === 'weekly' && { backgroundColor: colors.primary },
-            ]}
+            style={[styles.tabItem, activeTab === 'weekly' && { backgroundColor: colors.primarySoft }]}
             onPress={() => setActiveTab('weekly')}
             activeOpacity={0.8}
           >
             <Text
               style={[
-                styles.tabBtnText,
-                {
-                  color: activeTab === 'weekly' ? '#FFFFFF' : colors.textSecondary,
-                  fontWeight: activeTab === 'weekly' ? '700' : '500',
-                },
+                styles.tabText,
+                { color: activeTab === 'weekly' ? colors.primary : colors.textSecondary, fontWeight: activeTab === 'weekly' ? '600' : '400' },
               ]}
             >
-              Weekly
+              Weekly Overview
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[
-              styles.tabBtn,
-              activeTab === 'monthly' && { backgroundColor: colors.primary },
-            ]}
+            style={[styles.tabItem, activeTab === 'monthly' && { backgroundColor: colors.primarySoft }]}
             onPress={() => setActiveTab('monthly')}
             activeOpacity={0.8}
           >
             <Text
               style={[
-                styles.tabBtnText,
-                {
-                  color: activeTab === 'monthly' ? '#FFFFFF' : colors.textSecondary,
-                  fontWeight: activeTab === 'monthly' ? '700' : '500',
-                },
+                styles.tabText,
+                { color: activeTab === 'monthly' ? colors.primary : colors.textSecondary, fontWeight: activeTab === 'monthly' ? '600' : '400' },
               ]}
             >
-              Monthly
+              Monthly Rhythm
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Section Heading & Date Subtitle */}
-        <View style={styles.titleSection}>
-          <Text style={[styles.mainProgressTitle, { color: colors.textPrimary }]}>
-            Your {activeTab === 'weekly' ? 'Weekly' : 'Monthly'} Progress
-          </Text>
-          <Text style={[styles.dateRangeSubtitle, { color: colors.textSecondary }]}>
-            {activeTab === 'weekly' ? '‹ 5 - 11 May 2025 ›' : '‹ May 2025 ›'}
+        {/* Date Subtitle */}
+        <View style={styles.dateHeader}>
+          <Text style={[styles.dateRange, { color: colors.textSecondary }]}>
+            {activeTab === 'weekly' ? 'May 5 – 11, 2025' : 'May 2025'}
           </Text>
         </View>
 
         {/* Category Progress Bars */}
-        <SoftCard style={{ padding: 16, marginTop: 14 }}>
+        <SoftCard style={{ padding: 18, marginBottom: 24 }} borderRadius={20}>
           {progress.categories
             .filter((c) => c.enabled)
-            .map((cat, idx) => (
-              <View
-                key={cat.id}
-                style={[
-                  styles.categoryProgressRow,
-                  idx < progress.categories.length - 1 && {
-                    marginBottom: 16,
-                  },
-                ]}
-              >
-                <View style={[styles.iconCircle, { backgroundColor: colors.primarySoft }]}>
-                  <Text style={{ fontSize: 16 }}>{cat.icon}</Text>
-                </View>
-
-                <View style={styles.barContainer}>
-                  <View style={styles.labelRow}>
-                    <Text style={[styles.catLabel, { color: colors.textPrimary }]}>
-                      {cat.label}
-                    </Text>
-                    <Text style={[styles.percentLabel, { color: colors.textSecondary }]}>
-                      {cat.percentage}%
-                    </Text>
+            .map((cat, idx, arr) => {
+              const IconComp = iconMapping[cat.id] || IconFace;
+              return (
+                <View
+                  key={cat.id}
+                  style={[
+                    styles.progressRow,
+                    idx < arr.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.borderSubtle },
+                  ]}
+                >
+                  <View style={[styles.iconBox, { backgroundColor: colors.cardAlt }]}>
+                    <IconComp size={16} color={colors.primary} />
                   </View>
-                  <ProgressBar
-                    progress={cat.percentage}
-                    color={colors.primary}
-                    height={8}
-                    style={{ marginTop: 6 }}
-                  />
+
+                  <View style={styles.barBox}>
+                    <View style={styles.barLabelRow}>
+                      <Text style={[styles.catName, { color: colors.textPrimary }]}>
+                        {cat.label}
+                      </Text>
+                      <Text style={[styles.catPercent, { color: colors.primary }]}>
+                        {cat.percentage}%
+                      </Text>
+                    </View>
+                    <ProgressBar
+                      progress={cat.percentage}
+                      color={colors.primary}
+                      height={6}
+                      style={{ marginTop: 6 }}
+                    />
+                  </View>
                 </View>
-              </View>
-            ))}
+              );
+            })}
         </SoftCard>
 
-        {/* Streaks & Consistency Overview */}
-        <View style={styles.statsGrid}>
-          <SoftCard style={styles.statCard} padding={14}>
-            <Text style={{ fontSize: 24, marginBottom: 4 }}>🔥</Text>
-            <Text style={[styles.statValue, { color: colors.textPrimary }]}>
-              {progress.currentStreak} Days
+        {/* Streak & Consistency Metrics */}
+        <View style={styles.metricsGrid}>
+          <SoftCard style={styles.metricCard} padding={16} borderRadius={16}>
+            <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Current Streak</Text>
+            <Text style={[styles.metricVal, { color: colors.textPrimary }]}>
+              {progress.currentStreak} <Text style={styles.metricUnit}>Days</Text>
             </Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-              Current Streak
-            </Text>
+            <Text style={[styles.metricSub, { color: colors.success }]}>Consistent momentum</Text>
           </SoftCard>
 
-          <SoftCard style={styles.statCard} padding={14}>
-            <Text style={{ fontSize: 24, marginBottom: 4 }}>🏆</Text>
-            <Text style={[styles.statValue, { color: colors.textPrimary }]}>
-              {progress.longestStreak} Days
+          <SoftCard style={styles.metricCard} padding={16} borderRadius={16}>
+            <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Best Streak</Text>
+            <Text style={[styles.metricVal, { color: colors.textPrimary }]}>
+              {progress.longestStreak} <Text style={styles.metricUnit}>Days</Text>
             </Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-              Best Streak
-            </Text>
+            <Text style={[styles.metricSub, { color: colors.textMuted }]}>Personal record</Text>
           </SoftCard>
 
-          <SoftCard style={styles.statCard} padding={14}>
-            <Text style={{ fontSize: 24, marginBottom: 4 }}>✨</Text>
-            <Text style={[styles.statValue, { color: colors.textPrimary }]}>
+          <SoftCard style={styles.metricCard} padding={16} borderRadius={16}>
+            <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Completion Rate</Text>
+            <Text style={[styles.metricVal, { color: colors.textPrimary }]}>
               {progress.weeklyCompletion}%
             </Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-              Completion
-            </Text>
+            <Text style={[styles.metricSub, { color: colors.textMuted }]}>Across all habits</Text>
           </SoftCard>
         </View>
       </ScrollView>
@@ -165,83 +166,84 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
+    paddingTop: 16,
     paddingBottom: 40,
   },
   tabBar: {
     flexDirection: 'row',
-    borderRadius: 24,
-    padding: 4,
-    marginVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 3,
+    marginBottom: 16,
   },
-  tabBtn: {
+  tabItem: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 9,
     alignItems: 'center',
-    borderRadius: 20,
+    borderRadius: 13,
   },
-  tabBtnText: {
-    fontSize: 14,
+  tabText: {
+    fontSize: 13,
   },
-  titleSection: {
-    marginTop: 6,
+  dateHeader: {
     alignItems: 'center',
+    marginBottom: 16,
   },
-  mainProgressTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    letterSpacing: -0.2,
+  dateRange: {
+    fontSize: 13,
+    fontWeight: '500',
   },
-  dateRangeSubtitle: {
-    fontSize: 12,
-    marginTop: 4,
-  },
-  categoryProgressRow: {
+  progressRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 12,
   },
-  iconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  iconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 14,
   },
-  barContainer: {
+  barBox: {
     flex: 1,
   },
-  labelRow: {
+  barLabelRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
   },
-  catLabel: {
-    fontSize: 14,
+  catName: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  catPercent: {
+    fontSize: 13,
     fontWeight: '600',
   },
-  percentLabel: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  statsGrid: {
+  metricsGrid: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 18,
   },
-  statCard: {
+  metricCard: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 18,
   },
-  statValue: {
-    fontSize: 16,
+  metricLabel: {
+    fontSize: 11,
+    fontWeight: '500',
+    marginBottom: 6,
+  },
+  metricVal: {
+    fontSize: 18,
     fontWeight: '700',
   },
-  statLabel: {
+  metricUnit: {
+    fontSize: 12,
+    fontWeight: '400',
+  },
+  metricSub: {
     fontSize: 11,
-    marginTop: 2,
-    textAlign: 'center',
+    marginTop: 4,
   },
 });

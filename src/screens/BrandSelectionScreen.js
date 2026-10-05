@@ -11,6 +11,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { useApp } from '../data/AppContext';
 import { AppHeader } from '../components/AppHeader';
 import { SoftCard } from '../components/SoftCard';
+import { IconSearch, IconCheck } from '../components/Icons';
 
 export const BrandSelectionScreen = () => {
   const { colors } = useTheme();
@@ -59,23 +60,23 @@ export const BrandSelectionScreen = () => {
             { backgroundColor: colors.card, borderColor: colors.border },
           ]}
         >
-          <Text style={{ fontSize: 14, marginRight: 8 }}>🔍</Text>
+          <IconSearch size={16} color={colors.textSecondary} />
           <TextInput
             style={[styles.searchInput, { color: colors.textPrimary }]}
-            placeholder="Search brand..."
+            placeholder="Search brand or company..."
             placeholderTextColor={colors.textMuted}
             value={search}
             onChangeText={setSearch}
           />
           {search.length > 0 && (
             <TouchableOpacity onPress={() => setSearch('')}>
-              <Text style={{ color: colors.textMuted, fontSize: 14 }}>✕</Text>
+              <Text style={{ color: colors.textMuted, fontSize: 13 }}>✕</Text>
             </TouchableOpacity>
           )}
         </View>
 
         {/* Brands List */}
-        <SoftCard style={{ padding: 6, marginTop: 14 }}>
+        <SoftCard style={{ padding: 4 }} borderRadius={18}>
           {filteredBrands.map((brand, idx) => {
             const isSelected = !isOtherSelected && selectedBrand === brand;
             return (
@@ -83,10 +84,7 @@ export const BrandSelectionScreen = () => {
                 key={brand}
                 style={[
                   styles.brandRow,
-                  idx < filteredBrands.length - 1 && {
-                    borderBottomWidth: 1,
-                    borderBottomColor: colors.borderSubtle,
-                  },
+                  idx < filteredBrands.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.borderSubtle },
                 ]}
                 onPress={() => handleSelectBrand(brand)}
                 activeOpacity={0.7}
@@ -96,24 +94,18 @@ export const BrandSelectionScreen = () => {
                     styles.radioCircle,
                     {
                       borderColor: isSelected ? colors.primary : colors.border,
+                      backgroundColor: isSelected ? colors.primarySoft : 'transparent',
                     },
                   ]}
                 >
-                  {isSelected && (
-                    <View
-                      style={[
-                        styles.radioInner,
-                        { backgroundColor: colors.primary },
-                      ]}
-                    />
-                  )}
+                  {isSelected && <IconCheck size={11} color={colors.primary} strokeWidth={2.4} />}
                 </View>
                 <Text
                   style={[
                     styles.brandText,
                     {
                       color: isSelected ? colors.primary : colors.textPrimary,
-                      fontWeight: isSelected ? '700' : '400',
+                      fontWeight: isSelected ? '600' : '400',
                     },
                   ]}
                 >
@@ -125,10 +117,7 @@ export const BrandSelectionScreen = () => {
 
           {/* Others (Type your own) */}
           <TouchableOpacity
-            style={[
-              styles.brandRow,
-              { borderTopWidth: 1, borderTopColor: colors.borderSubtle },
-            ]}
+            style={[styles.brandRow, { borderTopWidth: 1, borderTopColor: colors.borderSubtle }]}
             onPress={() => setIsOtherSelected(true)}
             activeOpacity={0.7}
           >
@@ -137,28 +126,22 @@ export const BrandSelectionScreen = () => {
                 styles.radioCircle,
                 {
                   borderColor: isOtherSelected ? colors.primary : colors.border,
+                  backgroundColor: isOtherSelected ? colors.primarySoft : 'transparent',
                 },
               ]}
             >
-              {isOtherSelected && (
-                <View
-                  style={[
-                    styles.radioInner,
-                    { backgroundColor: colors.primary },
-                  ]}
-                />
-              )}
+              {isOtherSelected && <IconCheck size={11} color={colors.primary} strokeWidth={2.4} />}
             </View>
             <Text
               style={[
                 styles.brandText,
                 {
                   color: isOtherSelected ? colors.primary : colors.textPrimary,
-                  fontWeight: isOtherSelected ? '700' : '500',
+                  fontWeight: isOtherSelected ? '600' : '500',
                 },
               ]}
             >
-              Others (Type your own)
+              Other (Type your own)
             </Text>
           </TouchableOpacity>
 
@@ -167,11 +150,7 @@ export const BrandSelectionScreen = () => {
               <TextInput
                 style={[
                   styles.customInput,
-                  {
-                    backgroundColor: colors.cardAlt,
-                    borderColor: colors.border,
-                    color: colors.textPrimary,
-                  },
+                  { backgroundColor: colors.cardAlt, borderColor: colors.border, color: colors.textPrimary },
                 ]}
                 placeholder="Enter brand / company name"
                 placeholderTextColor={colors.textMuted}
@@ -180,7 +159,6 @@ export const BrandSelectionScreen = () => {
                 autoFocus
               />
 
-              {/* Checkbox: Save this brand for future use */}
               <TouchableOpacity
                 style={styles.saveFutureRow}
                 onPress={() => setSaveForFuture(!saveForFuture)}
@@ -191,11 +169,11 @@ export const BrandSelectionScreen = () => {
                     styles.checkbox,
                     {
                       borderColor: saveForFuture ? colors.primary : colors.border,
-                      backgroundColor: saveForFuture ? colors.primary : 'transparent',
+                      backgroundColor: saveForFuture ? colors.primarySoft : 'transparent',
                     },
                   ]}
                 >
-                  {saveForFuture && <Text style={styles.checkMark}>✓</Text>}
+                  {saveForFuture && <IconCheck size={11} color={colors.primary} strokeWidth={2.4} />}
                 </View>
                 <Text style={[styles.saveFutureLabel, { color: colors.textSecondary }]}>
                   Save this brand for future use
@@ -205,7 +183,7 @@ export const BrandSelectionScreen = () => {
               <TouchableOpacity
                 style={[styles.applyBrandBtn, { backgroundColor: colors.primary }]}
                 onPress={handleSaveOther}
-                activeOpacity={0.8}
+                activeOpacity={0.88}
               >
                 <Text style={styles.applyBrandText}>Use This Brand</Text>
               </TouchableOpacity>
@@ -222,17 +200,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
+    paddingTop: 16,
     paddingBottom: 40,
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 16,
     borderWidth: 1,
-    marginTop: 14,
+    gap: 10,
+    marginBottom: 16,
   },
   searchInput: {
     flex: 1,
@@ -248,22 +228,17 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    borderWidth: 2,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
-  },
-  radioInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    marginRight: 14,
   },
   brandText: {
-    fontSize: 15,
+    fontSize: 14,
   },
   customBrandInputArea: {
     padding: 12,
-    marginTop: 6,
+    marginTop: 4,
   },
   customInput: {
     paddingHorizontal: 14,
@@ -281,16 +256,11 @@ const styles = StyleSheet.create({
   checkbox: {
     width: 18,
     height: 18,
-    borderRadius: 5,
+    borderRadius: 6,
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
-  },
-  checkMark: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: 'bold',
   },
   saveFutureLabel: {
     fontSize: 13,
@@ -304,6 +274,6 @@ const styles = StyleSheet.create({
   applyBrandText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '600',
   },
 });

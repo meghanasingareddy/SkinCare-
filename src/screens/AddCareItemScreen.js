@@ -11,10 +11,11 @@ import { useTheme } from '../theme/ThemeContext';
 import { useApp } from '../data/AppContext';
 import { AppHeader } from '../components/AppHeader';
 import { SoftCard } from '../components/SoftCard';
+import { IconCheck } from '../components/Icons';
 
 export const AddCareItemScreen = () => {
-  const { colors, isDark } = useTheme();
-  const { addCareItem, navigate, goBack } = useApp();
+  const { colors } = useTheme();
+  const { addCareItem, goBack } = useApp();
 
   const categories = [
     'Hair Care',
@@ -64,17 +65,16 @@ export const AddCareItemScreen = () => {
       name: itemName,
       category,
       frequency: freq,
-      icon: category === 'Hair Care' ? '💆‍♀️' : category === 'Face Care' ? '🧖‍♀️' : '✨',
     });
 
-    alert(`Saved ${itemName} to your care schedule! 🌸`);
+    alert(`Saved ${itemName} to your scheduled care rituals.`);
     goBack();
   };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <AppHeader
-        title="Add Care Item"
+        title="Add Care Treatment"
         showBack={true}
         onBack={goBack}
       />
@@ -84,25 +84,20 @@ export const AddCareItemScreen = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* Category Field */}
-        <Text style={[styles.fieldLabel, { color: colors.textPrimary }]}>Category</Text>
+        <Text style={[styles.fieldLabel, { color: colors.textPrimary }]}>Treatment Category</Text>
         <TouchableOpacity
-          style={[
-            styles.dropdownButton,
-            { backgroundColor: colors.card, borderColor: colors.border },
-          ]}
+          style={[styles.dropdownButton, { backgroundColor: colors.card, borderColor: colors.border }]}
           onPress={() => setShowCategoryPicker(!showCategoryPicker)}
           activeOpacity={0.8}
         >
-          <Text style={[styles.dropdownValue, { color: colors.textPrimary }]}>
-            {category}
-          </Text>
+          <Text style={[styles.dropdownValue, { color: colors.textPrimary }]}>{category}</Text>
           <Text style={[styles.dropdownArrow, { color: colors.textSecondary }]}>
             {showCategoryPicker ? '▴' : '▾'}
           </Text>
         </TouchableOpacity>
 
         {showCategoryPicker && (
-          <SoftCard style={styles.categoryPickerList} padding={8}>
+          <SoftCard style={styles.categoryPickerList} padding={6}>
             {categories.map((cat) => (
               <TouchableOpacity
                 key={cat}
@@ -120,7 +115,7 @@ export const AddCareItemScreen = () => {
                     styles.catOptionText,
                     {
                       color: category === cat ? colors.primary : colors.textPrimary,
-                      fontWeight: category === cat ? '700' : '400',
+                      fontWeight: category === cat ? '600' : '400',
                     },
                   ]}
                 >
@@ -133,28 +128,24 @@ export const AddCareItemScreen = () => {
 
         {/* Item Name Field */}
         <Text style={[styles.fieldLabel, { color: colors.textPrimary, marginTop: 18 }]}>
-          Item Name
+          Treatment or Product Name
         </Text>
         <TextInput
           style={[
             styles.textInput,
-            {
-              backgroundColor: colors.card,
-              borderColor: colors.border,
-              color: colors.textPrimary,
-            },
+            { backgroundColor: colors.card, borderColor: colors.border, color: colors.textPrimary },
           ]}
           value={itemName}
           onChangeText={setItemName}
-          placeholder="e.g. Scalp Treatment, Face Mask"
+          placeholder="e.g. Scalp Treatment, Hydrating Sheet Mask"
           placeholderTextColor={colors.textMuted}
         />
 
         {/* Frequency Options */}
         <Text style={[styles.fieldLabel, { color: colors.textPrimary, marginTop: 22 }]}>
-          Frequency
+          Scheduled Frequency
         </Text>
-        <SoftCard style={{ padding: 10, marginTop: 6 }}>
+        <SoftCard style={{ padding: 4, marginTop: 6 }} borderRadius={18}>
           {frequencyOptions.map((opt, idx) => {
             const isSelected = selectedFrequency === opt.value;
             return (
@@ -162,10 +153,7 @@ export const AddCareItemScreen = () => {
                 key={opt.value}
                 style={[
                   styles.freqRow,
-                  idx < frequencyOptions.length - 1 && {
-                    borderBottomWidth: 1,
-                    borderBottomColor: colors.borderSubtle,
-                  },
+                  idx < frequencyOptions.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.borderSubtle },
                 ]}
                 onPress={() => setSelectedFrequency(opt.value)}
                 activeOpacity={0.7}
@@ -175,24 +163,18 @@ export const AddCareItemScreen = () => {
                     styles.radioCircle,
                     {
                       borderColor: isSelected ? colors.primary : colors.border,
+                      backgroundColor: isSelected ? colors.primarySoft : 'transparent',
                     },
                   ]}
                 >
-                  {isSelected && (
-                    <View
-                      style={[
-                        styles.radioInner,
-                        { backgroundColor: colors.primary },
-                      ]}
-                    />
-                  )}
+                  {isSelected && <IconCheck size={11} color={colors.primary} strokeWidth={2.4} />}
                 </View>
                 <Text
                   style={[
                     styles.freqText,
                     {
                       color: isSelected ? colors.primary : colors.textPrimary,
-                      fontWeight: isSelected ? '700' : '400',
+                      fontWeight: isSelected ? '600' : '400',
                     },
                   ]}
                 >
@@ -202,20 +184,15 @@ export const AddCareItemScreen = () => {
             );
           })}
 
-          {/* Custom Frequency Sub-input */}
           {selectedFrequency === 'Custom' && (
             <View style={styles.customFrequencyBox}>
               <Text style={[styles.customFreqLabel, { color: colors.textSecondary }]}>
-                Every
+                Repeat every:
               </Text>
               <TextInput
                 style={[
                   styles.customNumberInput,
-                  {
-                    backgroundColor: colors.cardAlt,
-                    borderColor: colors.border,
-                    color: colors.textPrimary,
-                  },
+                  { backgroundColor: colors.cardAlt, borderColor: colors.border, color: colors.textPrimary },
                 ]}
                 keyboardType="numeric"
                 value={customDays}
@@ -228,16 +205,15 @@ export const AddCareItemScreen = () => {
                     onPress={() => setCustomUnit(unit)}
                     style={[
                       styles.unitChip,
-                      customUnit === unit && {
-                        backgroundColor: colors.primary,
-                      },
+                      customUnit === unit && { backgroundColor: colors.primarySoft, borderColor: colors.primary, borderWidth: 1 },
                     ]}
                   >
                     <Text
                       style={[
                         styles.unitChipText,
                         {
-                          color: customUnit === unit ? '#FFFFFF' : colors.textSecondary,
+                          color: customUnit === unit ? colors.primary : colors.textSecondary,
+                          fontWeight: customUnit === unit ? '600' : '400',
                         },
                       ]}
                     >
@@ -253,10 +229,10 @@ export const AddCareItemScreen = () => {
         {/* Save Button */}
         <TouchableOpacity
           style={[styles.saveButton, { backgroundColor: colors.primary }]}
-          activeOpacity={0.85}
+          activeOpacity={0.88}
           onPress={handleSave}
         >
-          <Text style={styles.saveButtonText}>Save</Text>
+          <Text style={styles.saveButtonText}>Save Treatment Schedule</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -268,11 +244,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
+    paddingTop: 16,
     paddingBottom: 40,
   },
   fieldLabel: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     marginBottom: 8,
   },
@@ -281,13 +258,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 16,
+    paddingVertical: 13,
+    borderRadius: 14,
     borderWidth: 1,
   },
   dropdownValue: {
     fontSize: 14,
-    fontWeight: '500',
   },
   dropdownArrow: {
     fontSize: 14,
@@ -305,41 +281,35 @@ const styles = StyleSheet.create({
   },
   textInput: {
     paddingHorizontal: 16,
-    paddingVertical: 13,
-    borderRadius: 16,
+    paddingVertical: 12,
+    borderRadius: 14,
     borderWidth: 1,
     fontSize: 14,
   },
   freqRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 11,
-    paddingHorizontal: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
   },
   radioCircle: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    borderWidth: 2,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
-  },
-  radioInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    marginRight: 14,
   },
   freqText: {
     fontSize: 14,
   },
   customFrequencyBox: {
-    marginTop: 10,
+    marginTop: 8,
     padding: 12,
-    borderRadius: 12,
   },
   customFreqLabel: {
-    fontSize: 13,
+    fontSize: 12,
     marginBottom: 6,
   },
   customNumberInput: {
@@ -357,29 +327,29 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   unitChip: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: 'transparent',
   },
   unitChipText: {
     fontSize: 12,
-    fontWeight: '500',
   },
   saveButton: {
     marginTop: 24,
-    paddingVertical: 16,
-    borderRadius: 30,
+    paddingVertical: 14,
+    borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#B85C78',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.16,
     shadowRadius: 10,
     elevation: 3,
   },
   saveButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

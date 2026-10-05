@@ -11,9 +11,10 @@ import { useTheme } from '../theme/ThemeContext';
 import { useApp } from '../data/AppContext';
 import { AppHeader } from '../components/AppHeader';
 import { SoftCard } from '../components/SoftCard';
+import { IconMoodFace, IconMoon } from '../components/Icons';
 
 export const WellnessScreen = () => {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const {
     wellness,
     updateMood,
@@ -27,24 +28,24 @@ export const WellnessScreen = () => {
   const [noteText, setNoteText] = useState(wellness.note);
 
   const moodOptions = [
-    { key: 'very_low', label: 'Very low', emoji: '😞', tint: '#FEB2B2' },
-    { key: 'low', label: 'Low', emoji: '🙁', tint: '#FEEBC8' },
-    { key: 'okay', label: 'Okay', emoji: '😐', tint: '#FEFCBF' },
-    { key: 'good', label: 'Good', emoji: '😊', tint: '#C6F6D5' },
-    { key: 'very_good', label: 'Very good', emoji: '🥰', tint: '#FED7E2' },
+    { key: 'very_low', label: 'Very Low' },
+    { key: 'low', label: 'Tired' },
+    { key: 'okay', label: 'Balanced' },
+    { key: 'good', label: 'Calm' },
+    { key: 'very_good', label: 'Vibrant' },
   ];
 
   const levels = [1, 2, 3, 4, 5];
 
   const handleSave = () => {
     updateWellnessNote(noteText);
-    alert('Wellness check-in saved! 🧘‍♀️');
+    alert('Wellness check-in recorded.');
   };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <AppHeader
-        title="Wellness"
+        title="Mindful Wellness"
         showBack={true}
         onBack={() => navigate('home')}
       />
@@ -53,30 +54,30 @@ export const WellnessScreen = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Mood / Sleep / Journal Tabs */}
-        <View style={[styles.tabBar, { backgroundColor: colors.cardAlt }]}>
+        {/* Subtle Tab Switcher */}
+        <View style={[styles.tabBar, { backgroundColor: colors.card, borderColor: colors.border }]}>
           {['mood', 'sleep', 'journal'].map((tab) => {
             const isActive = activeTab === tab;
             return (
               <TouchableOpacity
                 key={tab}
                 style={[
-                  styles.tabButton,
-                  isActive && { backgroundColor: colors.primary },
+                  styles.tabItem,
+                  isActive && { backgroundColor: colors.primarySoft },
                 ]}
                 onPress={() => setActiveTab(tab)}
                 activeOpacity={0.8}
               >
                 <Text
                   style={[
-                    styles.tabButtonText,
+                    styles.tabText,
                     {
-                      color: isActive ? '#FFFFFF' : colors.textSecondary,
-                      fontWeight: isActive ? '700' : '500',
+                      color: isActive ? colors.primary : colors.textSecondary,
+                      fontWeight: isActive ? '600' : '400',
                     },
                   ]}
                 >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  {tab === 'mood' ? 'Mood Check-in' : tab === 'sleep' ? 'Sleep & Rest' : 'Reflections'}
                 </Text>
               </TouchableOpacity>
             );
@@ -84,12 +85,15 @@ export const WellnessScreen = () => {
         </View>
 
         {activeTab === 'mood' && (
-          <>
-            {/* How are you feeling today? */}
+          <SoftCard style={{ padding: 22 }} borderRadius={20}>
             <Text style={[styles.questionTitle, { color: colors.textPrimary }]}>
               How are you feeling today?
             </Text>
+            <Text style={[styles.questionSubtitle, { color: colors.textSecondary }]}>
+              Pause and check in with your mind and body.
+            </Text>
 
+            {/* Vector Mood Faces (No Emojis!) */}
             <View style={styles.moodRow}>
               {moodOptions.map((opt) => {
                 const isSelected = wellness.mood === opt.key;
@@ -98,25 +102,30 @@ export const WellnessScreen = () => {
                     key={opt.key}
                     onPress={() => updateMood(opt.key)}
                     style={styles.moodItem}
-                    activeOpacity={0.8}
+                    activeOpacity={0.7}
                   >
                     <View
                       style={[
-                        styles.moodCircle,
-                        {
-                          backgroundColor: isSelected ? colors.primarySoft : colors.card,
-                          borderColor: isSelected ? colors.primary : colors.border,
+                        styles.moodIconWrap,
+                        isSelected && {
+                          backgroundColor: colors.primarySoft,
+                          borderColor: colors.primary,
                         },
                       ]}
                     >
-                      <Text style={{ fontSize: 28 }}>{opt.emoji}</Text>
+                      <IconMoodFace
+                        mood={opt.key}
+                        size={30}
+                        isSelected={isSelected}
+                        activeColor={colors.primary}
+                      />
                     </View>
                     <Text
                       style={[
                         styles.moodLabel,
                         {
                           color: isSelected ? colors.primary : colors.textSecondary,
-                          fontWeight: isSelected ? '700' : '500',
+                          fontWeight: isSelected ? '600' : '400',
                         },
                       ]}
                     >
@@ -128,7 +137,7 @@ export const WellnessScreen = () => {
             </View>
 
             {/* Energy Level */}
-            <Text style={[styles.levelTitle, { color: colors.textPrimary, marginTop: 24 }]}>
+            <Text style={[styles.levelTitle, { color: colors.textPrimary, marginTop: 28 }]}>
               Energy Level
             </Text>
             <View style={styles.levelRow}>
@@ -141,18 +150,18 @@ export const WellnessScreen = () => {
                     style={[
                       styles.levelCircle,
                       {
-                        backgroundColor: isSelected ? colors.primary : colors.card,
+                        backgroundColor: isSelected ? colors.primary : colors.cardAlt,
                         borderColor: isSelected ? colors.primary : colors.border,
                       },
                     ]}
-                    activeOpacity={0.8}
+                    activeOpacity={0.7}
                   >
                     <Text
                       style={[
                         styles.levelText,
                         {
                           color: isSelected ? '#FFFFFF' : colors.textSecondary,
-                          fontWeight: isSelected ? '700' : '500',
+                          fontWeight: isSelected ? '600' : '500',
                         },
                       ]}
                     >
@@ -164,7 +173,7 @@ export const WellnessScreen = () => {
             </View>
 
             {/* Stress Level */}
-            <Text style={[styles.levelTitle, { color: colors.textPrimary, marginTop: 22 }]}>
+            <Text style={[styles.levelTitle, { color: colors.textPrimary, marginTop: 24 }]}>
               Stress Level
             </Text>
             <View style={styles.levelRow}>
@@ -177,18 +186,18 @@ export const WellnessScreen = () => {
                     style={[
                       styles.levelCircle,
                       {
-                        backgroundColor: isSelected ? colors.primary : colors.card,
+                        backgroundColor: isSelected ? colors.primary : colors.cardAlt,
                         borderColor: isSelected ? colors.primary : colors.border,
                       },
                     ]}
-                    activeOpacity={0.8}
+                    activeOpacity={0.7}
                   >
                     <Text
                       style={[
                         styles.levelText,
                         {
                           color: isSelected ? '#FFFFFF' : colors.textSecondary,
-                          fontWeight: isSelected ? '700' : '500',
+                          fontWeight: isSelected ? '600' : '500',
                         },
                       ]}
                     >
@@ -199,20 +208,20 @@ export const WellnessScreen = () => {
               })}
             </View>
 
-            {/* Notes (Optional) */}
-            <Text style={[styles.levelTitle, { color: colors.textPrimary, marginTop: 22 }]}>
-              Notes (Optional)
+            {/* Notes */}
+            <Text style={[styles.levelTitle, { color: colors.textPrimary, marginTop: 24 }]}>
+              Thoughts & Journal Note
             </Text>
             <TextInput
               style={[
                 styles.noteInput,
                 {
-                  backgroundColor: colors.card,
+                  backgroundColor: colors.cardAlt,
                   borderColor: colors.border,
                   color: colors.textPrimary,
                 },
               ]}
-              placeholder="What's on your mind?"
+              placeholder="What made you feel grounded or uplifted today?"
               placeholderTextColor={colors.textMuted}
               value={noteText}
               onChangeText={setNoteText}
@@ -222,95 +231,86 @@ export const WellnessScreen = () => {
             {/* Save Button */}
             <TouchableOpacity
               style={[styles.saveBtn, { backgroundColor: colors.primary }]}
-              activeOpacity={0.85}
+              activeOpacity={0.88}
               onPress={handleSave}
             >
-              <Text style={styles.saveBtnText}>Save</Text>
+              <Text style={styles.saveBtnText}>Save Reflection</Text>
             </TouchableOpacity>
-          </>
+          </SoftCard>
         )}
 
         {activeTab === 'sleep' && (
-          <View style={styles.sleepSection}>
-            <SoftCard style={{ padding: 20 }}>
-              <View style={styles.sleepHeroRow}>
-                <View>
-                  <Text style={[styles.sleepDuration, { color: colors.textPrimary }]}>
-                    {wellness.sleep.duration}
-                  </Text>
-                  <Text style={[styles.sleepSub, { color: colors.textSecondary }]}>
-                    Optimal rest achieved
-                  </Text>
-                </View>
-                <View style={[styles.sleepMoonCircle, { backgroundColor: colors.sleepBg }]}>
-                  <Text style={{ fontSize: 28 }}>🌙</Text>
-                </View>
+          <SoftCard style={{ padding: 24 }} borderRadius={20}>
+            <View style={styles.sleepHeroRow}>
+              <View>
+                <Text style={[styles.sleepDuration, { color: colors.textPrimary }]}>
+                  {wellness.sleep.duration}
+                </Text>
+                <Text style={[styles.sleepSubtitle, { color: colors.textSecondary }]}>
+                  Deep, restorative sleep recorded
+                </Text>
+              </View>
+              <View style={[styles.sleepIconBox, { backgroundColor: colors.moonNightSoft }]}>
+                <IconMoon size={22} color={colors.moonNight} />
+              </View>
+            </View>
+
+            <View style={[styles.sleepDetailsRow, { borderTopColor: colors.borderSubtle }]}>
+              <View style={styles.sleepCol}>
+                <Text style={[styles.sleepColLabel, { color: colors.textMuted }]}>FELL ASLEEP</Text>
+                <Text style={[styles.sleepColVal, { color: colors.textPrimary }]}>
+                  {wellness.sleep.sleepTime}
+                </Text>
               </View>
 
-              <View style={[styles.sleepDetailsRow, { borderTopColor: colors.borderSubtle }]}>
-                <View style={styles.sleepCol}>
-                  <Text style={[styles.sleepColLabel, { color: colors.textMuted }]}>
-                    SLEEP TIME
-                  </Text>
-                  <Text style={[styles.sleepColVal, { color: colors.textPrimary }]}>
-                    {wellness.sleep.sleepTime}
-                  </Text>
-                </View>
-
-                <View style={styles.sleepCol}>
-                  <Text style={[styles.sleepColLabel, { color: colors.textMuted }]}>
-                    WAKE TIME
-                  </Text>
-                  <Text style={[styles.sleepColVal, { color: colors.textPrimary }]}>
-                    {wellness.sleep.wakeTime}
-                  </Text>
-                </View>
-
-                <View style={styles.sleepCol}>
-                  <Text style={[styles.sleepColLabel, { color: colors.textMuted }]}>
-                    TARGET
-                  </Text>
-                  <Text style={[styles.sleepColVal, { color: colors.textPrimary }]}>
-                    {wellness.sleep.targetHours}h
-                  </Text>
-                </View>
+              <View style={styles.sleepCol}>
+                <Text style={[styles.sleepColLabel, { color: colors.textMuted }]}>WOKE UP</Text>
+                <Text style={[styles.sleepColVal, { color: colors.textPrimary }]}>
+                  {wellness.sleep.wakeTime}
+                </Text>
               </View>
-            </SoftCard>
-          </View>
+
+              <View style={styles.sleepCol}>
+                <Text style={[styles.sleepColLabel, { color: colors.textMuted }]}>GOAL</Text>
+                <Text style={[styles.sleepColVal, { color: colors.textPrimary }]}>
+                  {wellness.sleep.targetHours}h 00m
+                </Text>
+              </View>
+            </View>
+          </SoftCard>
         )}
 
         {activeTab === 'journal' && (
-          <View style={styles.journalSection}>
-            <SoftCard style={{ padding: 20 }}>
-              <Text style={[styles.journalPrompt, { color: colors.textPrimary }]}>
-                Daily Reflection & Gratitude
-              </Text>
-              <Text style={[styles.journalSub, { color: colors.textSecondary }]}>
-                Write down 3 things you are grateful for today or reflections on your skincare and wellness journey.
-              </Text>
+          <SoftCard style={{ padding: 24 }} borderRadius={20}>
+            <Text style={[styles.journalHeading, { color: colors.textPrimary }]}>
+              Daily Gratitude
+            </Text>
+            <Text style={[styles.journalSub, { color: colors.textSecondary }]}>
+              Take 2 minutes to write down three things that brought you calm today.
+            </Text>
 
-              <TextInput
-                style={[
-                  styles.journalInput,
-                  {
-                    backgroundColor: colors.cardAlt,
-                    borderColor: colors.border,
-                    color: colors.textPrimary,
-                  },
-                ]}
-                placeholder="1. Fresh morning sunshine..."
-                placeholderTextColor={colors.textMuted}
-                multiline
-              />
+            <TextInput
+              style={[
+                styles.journalInput,
+                {
+                  backgroundColor: colors.cardAlt,
+                  borderColor: colors.border,
+                  color: colors.textPrimary,
+                },
+              ]}
+              placeholder="1. The morning sunlight during my skincare routine..."
+              placeholderTextColor={colors.textMuted}
+              multiline
+            />
 
-              <TouchableOpacity
-                style={[styles.saveBtn, { backgroundColor: colors.primary, marginTop: 16 }]}
-                onPress={() => alert('Journal entry recorded! ✍️')}
-              >
-                <Text style={styles.saveBtnText}>Save Entry</Text>
-              </TouchableOpacity>
-            </SoftCard>
-          </View>
+            <TouchableOpacity
+              style={[styles.saveBtn, { backgroundColor: colors.primary, marginTop: 18 }]}
+              onPress={() => alert('Gratitude entry saved.')}
+              activeOpacity={0.88}
+            >
+              <Text style={styles.saveBtnText}>Save Gratitude Entry</Text>
+            </TouchableOpacity>
+          </SoftCard>
         )}
       </ScrollView>
     </View>
@@ -322,30 +322,35 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
+    paddingTop: 16,
     paddingBottom: 40,
   },
   tabBar: {
     flexDirection: 'row',
-    borderRadius: 24,
-    padding: 4,
-    marginVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 3,
+    marginBottom: 20,
   },
-  tabButton: {
+  tabItem: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 9,
     alignItems: 'center',
-    borderRadius: 20,
+    borderRadius: 13,
   },
-  tabButtonText: {
-    fontSize: 14,
+  tabText: {
+    fontSize: 13,
   },
   questionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    marginTop: 10,
-    marginBottom: 16,
-    letterSpacing: -0.2,
+    fontSize: 18,
+    fontWeight: '600',
+    letterSpacing: -0.3,
+  },
+  questionSubtitle: {
+    fontSize: 13,
+    marginTop: 4,
+    marginBottom: 24,
   },
   moodRow: {
     flexDirection: 'row',
@@ -355,28 +360,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '18%',
   },
-  moodCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    borderWidth: 1.5,
+  moodIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   moodLabel: {
     fontSize: 11,
     textAlign: 'center',
   },
   levelTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     marginBottom: 12,
   },
   levelRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 10,
   },
   levelCircle: {
     width: 44,
@@ -387,61 +392,60 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   levelText: {
-    fontSize: 15,
+    fontSize: 14,
   },
   noteInput: {
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderRadius: 16,
     borderWidth: 1,
-    height: 100,
+    height: 90,
     textAlignVertical: 'top',
     fontSize: 14,
   },
   saveBtn: {
-    marginTop: 26,
-    paddingVertical: 16,
-    borderRadius: 30,
+    marginTop: 24,
+    paddingVertical: 14,
+    borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#B85C78',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.16,
     shadowRadius: 10,
     elevation: 3,
   },
   saveBtnText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  sleepSection: {
-    marginTop: 10,
+    fontSize: 15,
+    fontWeight: '600',
   },
   sleepHeroRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
   sleepDuration: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: '800',
+    letterSpacing: -0.5,
   },
-  sleepSub: {
+  sleepSubtitle: {
     fontSize: 13,
     marginTop: 4,
   },
-  sleepMoonCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+  sleepIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
   sleepDetailsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: 16,
+    paddingTop: 18,
     borderTopWidth: 1,
   },
   sleepCol: {
@@ -450,25 +454,22 @@ const styles = StyleSheet.create({
   sleepColLabel: {
     fontSize: 10,
     fontWeight: '700',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
     marginBottom: 4,
   },
   sleepColVal: {
     fontSize: 14,
     fontWeight: '600',
   },
-  journalSection: {
-    marginTop: 10,
-  },
-  journalPrompt: {
+  journalHeading: {
     fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 6,
+    fontWeight: '600',
   },
   journalSub: {
     fontSize: 13,
-    marginBottom: 14,
-    lineHeight: 18,
+    marginTop: 4,
+    marginBottom: 16,
+    lineHeight: 20,
   },
   journalInput: {
     paddingHorizontal: 16,
